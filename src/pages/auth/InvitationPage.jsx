@@ -1,29 +1,29 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import api from '../../api/axios'
 
 export default function InvitationPage() {
   const { token } = useParams()
-  const navigate  = useNavigate()
 
   const [invitation, setInvitation] = useState(null)
   const [checking, setChecking]     = useState(true)
   const [tokenError, setTokenError] = useState(null)
   const [success, setSuccess]       = useState(false)
 
-  const [form, setForm]   = useState({ password: '', password_confirmation: '' })
+  const [form, setForm]     = useState({ password: '', password_confirmation: '' })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
-  // Vérifier le token au chargement
+  // ── Vérifier le token au chargement ──
   useEffect(() => {
     api.get(`/invitation/${token}`)
       .then(res => setInvitation(res.data))
       .catch(err => {
+        const status = err.response?.status
         setTokenError(
-          err.response?.status === 410
-            ? 'Cette invitation a expiré ou a déjà été utilisée.'
-            : 'Invitation introuvable.'
+          status === 410 ? 'Cette invitation a expiré ou a déjà été utilisée.'
+          : status === 404 ? 'Invitation introuvable.'
+          : 'Une erreur est survenue lors de la vérification.'
         )
       })
       .finally(() => setChecking(false))
@@ -39,38 +39,36 @@ export default function InvitationPage() {
     setLoading(true)
     setErrors({})
 
-    // Vérification côté client
-    if (form.password !== form.password_confirmation) {
-      setErrors({ password_confirmation: ['Les mots de passe ne correspondent pas.'] })
-      setLoading(false)
-      return
-    }
-
+    // Validation côté client
     if (form.password.length < 8) {
       setErrors({ password: ['Le mot de passe doit contenir au moins 8 caractères.'] })
       setLoading(false)
       return
     }
 
+    if (form.password !== form.password_confirmation) {
+      setErrors({ password_confirmation: ['Les mots de passe ne correspondent pas.'] })
+      setLoading(false)
+      return
+    }
+
     try {
-      // Réinitialiser le mot de passe via le token
-      await api.post('/reset-password', {
-        token,
-        email:                 invitation.email,
+      // ✅ Utilise le bon endpoint dédié (pas reset-password !)
+      await api.post(`/invitation/${token}/activate`, {
         password:              form.password,
         password_confirmation: form.password_confirmation,
       })
 
-      // ✅ Succès → afficher message puis rediriger vers /login
       setSuccess(true)
 
     } catch (err) {
-      if (err.response?.status === 422) {
+      const status = err.response?.status
+      if (status === 422) {
         setErrors(err.response.data.errors || {})
+      } else if (status === 410) {
+        setTokenError('Cette invitation a expiré ou a déjà été utilisée.')
       } else {
-        setErrors({
-          general: 'Une erreur est survenue. Le lien est peut-être expiré.'
-        })
+        setErrors({ general: err.response?.data?.message || 'Une erreur est survenue.' })
       }
     } finally {
       setLoading(false)
@@ -84,7 +82,7 @@ export default function InvitationPage() {
     </div>
   )
 
-  // ── Token invalide ──
+  // ── Token invalide / expiré ──
   if (tokenError) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center space-y-4">
@@ -101,7 +99,7 @@ export default function InvitationPage() {
     </div>
   )
 
-  // ── Succès → rediriger vers login ──
+  // ── Succès : compte activé ──
   if (success) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -110,25 +108,25 @@ export default function InvitationPage() {
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center space-y-4">
           <div className="text-6xl">🎉</div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Compte activé avec succès !
-          </h2>
-          <p className="text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-900">Compte activé !</h2>
+          <p className="text-gray-500 text-sm">
             {invitation?.role === 'comite'
-              ? 'Bienvenue dans l\'équipe UNEXE ! Connectez-vous pour accéder à votre espace.'
-              : 'Bienvenue sur UNEXE ! Connectez-vous pour compléter votre profil candidat.'
+              ? 'Bienvenue dans l\'équipe UNEXE ! Connectez-vous pour accéder à votre espace administrateur.'
+              : 'Bienvenue sur UNEXE ! Connectez-vous puis complétez votre profil candidat.'
             }
           </p>
 
-          {/* Info compte */}
+          {/* Rappel identifiants */}
           <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 border border-gray-200">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm">
               <span className="font-medium text-gray-700">Email :</span>{' '}
-              {invitation?.email}
+              <span className="text-gray-600">{invitation?.email}</span>
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm">
               <span className="font-medium text-gray-700">Rôle :</span>{' '}
-              {invitation?.role === 'comite' ? '🛡️ Membre du Comité' : '🏆 Candidat UNEXE'}
+              <span className={`font-semibold ${invitation?.role === 'comite' ? 'text-blue-600' : 'text-green-600'}`}>
+                {invitation?.role === 'comite' ? '🛡️ Membre du Comité' : '🏆 Candidat UNEXE'}
+              </span>
             </p>
           </div>
 
@@ -143,7 +141,7 @@ export default function InvitationPage() {
     </div>
   )
 
-  // ── Formulaire principal ──
+  // ── Formulaire ──
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -168,9 +166,7 @@ export default function InvitationPage() {
                 ? 'bg-blue-100 text-blue-700'
                 : 'bg-green-100 text-green-700'}`}
             >
-              {invitation?.role === 'comite'
-                ? '🛡️ Membre du Comité'
-                : '🏆 Candidat UNEXE'}
+              {invitation?.role === 'comite' ? '🛡️ Membre du Comité' : '🏆 Candidat UNEXE'}
             </span>
           </div>
 
@@ -178,7 +174,7 @@ export default function InvitationPage() {
             Choisissez votre mot de passe
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            Définissez un mot de passe sécurisé pour accéder à votre espace.
+            Créez un mot de passe sécurisé pour votre compte UNEXE.
           </p>
 
           {/* Erreur générale */}
@@ -201,6 +197,7 @@ export default function InvitationPage() {
                 onChange={handleChange}
                 required
                 placeholder="Minimum 8 caractères"
+                autoComplete="new-password"
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition
                   ${errors.password ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
               />
@@ -222,6 +219,7 @@ export default function InvitationPage() {
                 onChange={handleChange}
                 required
                 placeholder="••••••••"
+                autoComplete="new-password"
                 className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition
                   ${errors.password_confirmation ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
               />
@@ -245,7 +243,7 @@ export default function InvitationPage() {
 
           <p className="text-center text-xs text-gray-400 mt-6">
             Déjà un compte ?{' '}
-            <Link to="/login" className="text-red-600 hover:underline">
+            <Link to="/login" className="text-red-600 hover:underline font-medium">
               Se connecter
             </Link>
           </p>
