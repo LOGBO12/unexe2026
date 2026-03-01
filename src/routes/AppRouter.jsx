@@ -12,8 +12,7 @@ import CompleteProfilePage from '../pages/auth/CompleteProfilePage'
 import MainLayout   from '../layouts/MainLayout'
 import PublicLayout from '../layouts/PublicLayout'
 
-import HomePage      from '../pages/public/HomePage'
-import CommitteePage from '../pages/public/CommitteePage'
+import HomePage from '../pages/public/HomePage'
 
 import DashboardPage        from '../pages/admin/DashboardPage'
 import InvitationsPage      from '../pages/admin/InvitationsPage'
@@ -63,12 +62,14 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
 
-        {/* Accueil — page standalone avec son propre design dark */}
+        {/* ── Accueil public (standalone, avec son propre Navbar + Footer) */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Pages publiques avec Navbar + Footer */}
+        {/* Redirection ancienne page comité → accueil */}
+        <Route path="/comite" element={<Navigate to="/" replace />} />
+
+        {/* Pages publiques avec PublicLayout */}
         <Route element={<PublicLayout />}>
-          <Route path="/comite"      element={<CommitteePage />} />
           <Route path="/candidats"   element={<CandidatsPublic />} />
           <Route path="/partenaires" element={<Partenaires />} />
           <Route path="/communaute"  element={<Communaute />} />
