@@ -28,15 +28,20 @@ export function AuthProvider({ children }) {
     const { token, user } = res.data
     localStorage.setItem('token', token)
     setUser(user)
-    return user // on retourne l'user pour rediriger selon le rôle
+    return user
   }
 
   const logout = async () => {
     try {
       await api.post('/logout')
+    } catch (e) {
+      // ignorer les erreurs réseau
     } finally {
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       setUser(null)
+      // ✅ Forcer rechargement complet vers l'accueil
+      window.location.href = '/'
     }
   }
 

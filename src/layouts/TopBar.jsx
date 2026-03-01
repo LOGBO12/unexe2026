@@ -1,15 +1,8 @@
 import { Menu, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 
 export default function TopBar({ onMenuClick }) {
   const { user, logout } = useAuth()
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10">
@@ -21,7 +14,6 @@ export default function TopBar({ onMenuClick }) {
         <Menu size={20} />
       </button>
 
-      {/* Titre page (vide pour l'instant, on le remplira dynamiquement) */}
       <div className="hidden lg:block" />
 
       {/* Actions droite */}
@@ -31,7 +23,7 @@ export default function TopBar({ onMenuClick }) {
         </span>
 
         <button
-          onClick={handleLogout}
+          onClick={logout}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
         >
           <LogOut size={16} />
