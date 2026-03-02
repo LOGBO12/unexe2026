@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import api from '../../api/axios'
+import { 
+  Mail, Lock, Eye, EyeOff, CheckCircle, 
+  Sparkles, AlertCircle, UserCheck, Shield,
+  ArrowLeft, Send
+} from 'lucide-react'
 
 export default function InvitationPage() {
   const { token } = useParams()
@@ -10,11 +15,16 @@ export default function InvitationPage() {
   const [tokenError, setTokenError] = useState(null)
   const [success, setSuccess]       = useState(false)
 
-  const [form, setForm]     = useState({ password: '', password_confirmation: '' })
+  const [form, setForm] = useState({ 
+    password: '', 
+    password_confirmation: '' 
+  })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  // ── Vérifier le token au chargement ──
+  // Vérifier le token au chargement
   useEffect(() => {
     api.get(`/invitation/${token}`)
       .then(res => setInvitation(res.data))
@@ -53,14 +63,11 @@ export default function InvitationPage() {
     }
 
     try {
-      // ✅ Utilise le bon endpoint dédié (pas reset-password !)
       await api.post(`/invitation/${token}/activate`, {
-        password:              form.password,
+        password: form.password,
         password_confirmation: form.password_confirmation,
       })
-
       setSuccess(true)
-
     } catch (err) {
       const status = err.response?.status
       if (status === 422) {
@@ -75,132 +82,234 @@ export default function InvitationPage() {
     }
   }
 
-  // ── Chargement ──
+  // Chargement
   if (checking) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
-
-  // ── Token invalide / expiré ──
-  if (tokenError) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center space-y-4">
-        <div className="text-6xl">❌</div>
-        <h2 className="text-2xl font-bold text-gray-900">Invitation invalide</h2>
-        <p className="text-gray-500">{tokenError}</p>
-        <Link
-          to="/login"
-          className="inline-block mt-4 px-6 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition"
-        >
-          Aller à la connexion
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-[#2A2AE0] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-500">Vérification de votre invitation...</p>
       </div>
     </div>
   )
 
-  // ── Succès : compte activé ──
-  if (success) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+  // Token invalide / expiré
+  if (tokenError) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
+        {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">🎓 UNEXE</h1>
-        </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center space-y-4">
-          <div className="text-6xl">🎉</div>
-          <h2 className="text-2xl font-bold text-gray-900">Compte activé !</h2>
-          <p className="text-gray-500 text-sm">
-            {invitation?.role === 'comite'
-              ? 'Bienvenue dans l\'équipe UNEXE ! Connectez-vous pour accéder à votre espace administrateur.'
-              : 'Bienvenue sur UNEXE ! Connectez-vous puis complétez votre profil candidat.'
-            }
-          </p>
-
-          {/* Rappel identifiants */}
-          <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 border border-gray-200">
-            <p className="text-sm">
-              <span className="font-medium text-gray-700">Email :</span>{' '}
-              <span className="text-gray-600">{invitation?.email}</span>
-            </p>
-            <p className="text-sm">
-              <span className="font-medium text-gray-700">Rôle :</span>{' '}
-              <span className={`font-semibold ${invitation?.role === 'comite' ? 'text-blue-600' : 'text-green-600'}`}>
-                {invitation?.role === 'comite' ? '🛡️ Membre du Comité' : '🏆 Candidat UNEXE'}
-              </span>
-            </p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img 
+              src="/unexe-logo.jpeg" 
+              alt="UNEXE Logo" 
+              className="w-16 h-16 object-contain rounded-xl"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML += '<div class="w-16 h-16 bg-[#2A2AE0] rounded-xl flex items-center justify-center text-white text-2xl font-black">U</div>';
+              }}
+            />
           </div>
+          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+            UNEXE
+          </h1>
+        </div>
 
+        {/* Carte d'erreur */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100 text-center">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle size={40} className="text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Invitation invalide</h2>
+          <p className="text-gray-500 text-sm mb-6">{tokenError}</p>
           <Link
             to="/login"
-            className="inline-block w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition text-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2A2AE0] hover:bg-[#1A1AB0] text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
           >
-            Se connecter maintenant →
+            <ArrowLeft size={16} />
+            Retour à la connexion
           </Link>
         </div>
       </div>
     </div>
   )
 
-  // ── Formulaire ──
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+  // Succès : compte activé
+  if (success) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-
+        {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">🎓 UNEXE</h1>
-          <p className="text-gray-500 mt-1 text-sm">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img 
+              src="/unexe-logo.jpeg" 
+              alt="UNEXE Logo" 
+              className="w-16 h-16 object-contain rounded-xl"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML += '<div class="w-16 h-16 bg-[#2A2AE0] rounded-xl flex items-center justify-center text-white text-2xl font-black">U</div>';
+              }}
+            />
+          </div>
+          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+            UNEXE
+          </h1>
+        </div>
+
+        {/* Carte de succès */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100">
+          <div className="text-center space-y-6">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle size={40} className="text-green-500" />
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Compte activé !</h2>
+              <p className="text-gray-500 text-sm">
+                {invitation?.role === 'comite'
+                  ? 'Bienvenue dans l\'équipe UNEXE ! Connectez-vous pour accéder à votre espace administrateur.'
+                  : 'Bienvenue sur UNEXE ! Connectez-vous puis complétez votre profil candidat.'
+                }
+              </p>
+            </div>
+
+            {/* Carte des identifiants */}
+            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 text-left space-y-3">
+              <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
+                <Mail size={16} className="text-[#2A2AE0]" />
+                <span className="text-sm font-medium text-gray-700">Email</span>
+              </div>
+              <p className="text-sm text-gray-600 pl-7">{invitation?.email}</p>
+              
+              <div className="flex items-center gap-3 pt-2">
+                <Shield size={16} className="text-[#2A2AE0]" />
+                <span className="text-sm font-medium text-gray-700">Rôle</span>
+              </div>
+              <p className="pl-7">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
+                  ${invitation?.role === 'comite' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'bg-green-100 text-green-700'}`}
+                >
+                  <UserCheck size={12} />
+                  {invitation?.role === 'comite' ? 'Membre du Comité' : 'Candidat UNEXE'}
+                </span>
+              </p>
+            </div>
+
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#2A2AE0] hover:bg-[#1A1AB0] text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
+            >
+              Se connecter maintenant
+              <Send size={16} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Formulaire
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
+      {/* Éléments décoratifs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#2A2AE0] rounded-full opacity-5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#E8112D] rounded-full opacity-5 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo centré */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img 
+              src="/unexe-logo.jpeg" 
+              alt="UNEXE Logo" 
+              className="w-16 h-16 object-contain rounded-xl"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML += '<div class="w-16 h-16 bg-[#2A2AE0] rounded-xl flex items-center justify-center text-white text-2xl font-black">U</div>';
+              }}
+            />
+          </div>
+          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Playfair Display", serif' }}>
+            UNEXE
+          </h1>
+          <p className="text-gray-500 text-sm mt-2">
             {invitation?.role === 'comite'
               ? 'Rejoindre le Comité UNEXE'
               : 'Activer votre compte candidat'}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-
+        {/* Carte d'invitation */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100">
+          
           {/* Badge invitation */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <p className="text-xs text-gray-500 mb-1">Invitation pour</p>
-            <p className="font-semibold text-gray-800">{invitation?.email}</p>
-            <span className={`inline-block mt-2 text-xs font-semibold px-2 py-1 rounded-full
-              ${invitation?.role === 'comite'
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-green-100 text-green-700'}`}
-            >
-              {invitation?.role === 'comite' ? '🛡️ Membre du Comité' : '🏆 Candidat UNEXE'}
-            </span>
+          <div className="mb-6 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200">
+            <div className="flex items-center gap-3 mb-3">
+              <Mail size={18} className="text-[#2A2AE0]" />
+              <p className="text-xs text-gray-500">Invitation pour</p>
+            </div>
+            <p className="font-semibold text-gray-800 pl-7 mb-3">{invitation?.email}</p>
+            <div className="pl-7">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
+                ${invitation?.role === 'comite' 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-green-100 text-green-700'}`}
+              >
+                <UserCheck size={12} />
+                {invitation?.role === 'comite' ? 'Membre du Comité' : 'Candidat UNEXE'}
+              </span>
+            </div>
           </div>
 
-          <h2 className="text-xl font-semibold text-gray-800 mb-1">
-            Choisissez votre mot de passe
-          </h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Créez un mot de passe sécurisé pour votre compte UNEXE.
-          </p>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Choisissez votre mot de passe
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Créez un mot de passe sécurisé pour votre compte UNEXE.
+            </p>
+          </div>
 
           {/* Erreur générale */}
           {errors.general && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              ❌ {errors.general}
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-red-600 text-sm flex items-center gap-2">
+                <AlertCircle size={16} />
+                {errors.general}
+              </p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nouveau mot de passe */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nouveau mot de passe
               </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                placeholder="Minimum 8 caractères"
-                autoComplete="new-password"
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition
-                  ${errors.password ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Minimum 8 caractères"
+                  autoComplete="new-password"
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2A2AE0] focus:border-transparent transition bg-gray-50 hover:bg-white
+                    ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">
                   {Array.isArray(errors.password) ? errors.password[0] : errors.password}
@@ -208,21 +317,32 @@ export default function InvitationPage() {
               )}
             </div>
 
+            {/* Confirmation */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Confirmer le mot de passe
               </label>
-              <input
-                type="password"
-                name="password_confirmation"
-                value={form.password_confirmation}
-                onChange={handleChange}
-                required
-                placeholder="••••••••"
-                autoComplete="new-password"
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition
-                  ${errors.password_confirmation ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="password_confirmation"
+                  value={form.password_confirmation}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2A2AE0] focus:border-transparent transition bg-gray-50 hover:bg-white
+                    ${errors.password_confirmation ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password_confirmation && (
                 <p className="text-red-500 text-xs mt-1">
                   {Array.isArray(errors.password_confirmation)
@@ -232,22 +352,95 @@ export default function InvitationPage() {
               )}
             </div>
 
+            {/* Force du mot de passe */}
+            {form.password && (
+              <div className="space-y-2">
+                <div className="flex gap-1 h-1">
+                  <div className={`flex-1 rounded-full transition-all ${
+                    form.password.length >= 8 ? 'bg-green-500' : 'bg-gray-200'
+                  }`} />
+                  <div className={`flex-1 rounded-full transition-all ${
+                    /[0-9]/.test(form.password) && /[a-zA-Z]/.test(form.password) ? 'bg-green-500' : 'bg-gray-200'
+                  }`} />
+                  <div className={`flex-1 rounded-full transition-all ${
+                    /[!@#$%^&*]/.test(form.password) ? 'bg-green-500' : 'bg-gray-200'
+                  }`} />
+                </div>
+                <p className="text-xs text-gray-400">
+                  Force: {
+                    form.password.length < 8 ? 'Faible' :
+                    form.password.length >= 8 && /[0-9]/.test(form.password) && /[a-zA-Z]/.test(form.password) ? 'Moyenne' :
+                    'Forte'
+                  }
+                </p>
+              </div>
+            )}
+
+            {/* Bouton d'activation */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg text-sm transition"
+              className="w-full bg-[#2A2AE0] hover:bg-[#1A1AB0] disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2 group mt-6"
             >
-              {loading ? 'Activation...' : 'Activer mon compte →'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Activation en cours...
+                </>
+              ) : (
+                <>
+                  Activer mon compte
+                  <Send size={16} className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 mt-6">
+          {/* Séparateur */}
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-4 bg-white text-gray-400">ou</span>
+            </div>
+          </div>
+
+          {/* Lien connexion */}
+          <p className="text-center text-sm text-gray-500">
             Déjà un compte ?{' '}
-            <Link to="/login" className="text-red-600 hover:underline font-medium">
+            <Link
+              to="/login"
+              className="text-[#2A2AE0] font-semibold hover:underline inline-flex items-center gap-1 group"
+            >
               Se connecter
+              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             </Link>
           </p>
+
+          {/* Badge de sécurité */}
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-gray-400">
+            <Sparkles size={12} />
+            <span>Activation sécurisée · Chiffrement SSL</span>
+          </div>
+
+          {/* Drapeau Bénin mini */}
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <div className="flex h-4 w-6 rounded overflow-hidden shadow-sm">
+              <div className="w-1/3 bg-[#008751]" />
+              <div className="flex flex-col w-2/3">
+                <div className="flex-1 bg-[#FCD116]" />
+                <div className="flex-1 bg-[#E8112D]" />
+              </div>
+            </div>
+            <span className="text-xs text-gray-400">INSTI Lokossa · Bénin</span>
+          </div>
         </div>
+
+        {/* Footer */}
+        <p className="text-center text-xs text-gray-400 mt-6">
+          © {new Date().getFullYear()} UNEXE — University Excellence Elite. Tous droits réservés.
+        </p>
       </div>
     </div>
   )
