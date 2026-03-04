@@ -127,19 +127,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats membres + invitations */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Membres comité"       value={stats?.members?.total}       icon={Users} color="blue" />
-        <StatCard label="Invitations envoyées" value={stats?.invitations?.total}   icon={Mail}  color="gray" />
-        <StatCard label="Invitations en cours" value={stats?.invitations?.pending} icon={Clock} color="yellow" />
-        <StatCard
-          label="Logs d'actions"
-          value={recent_actions?.length + '+'}
-          icon={ScrollText}
-          color="gray"
-          sub="10 dernières"
-        />
-      </div>
+     
 
       {/* Tableau par département + Dernières actions */}
       <div className="grid lg:grid-cols-2 gap-6">

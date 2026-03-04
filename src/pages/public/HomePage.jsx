@@ -58,35 +58,87 @@ function StatCard({ value, label, icon: Icon, color = '#2A2AE0' }) {
   )
 }
 
-// ─── Partner Card (pour la homepage) ─────────────────────────────────────────
-function PartnerCard({ partner }) {
+// ─── Partner Logo Card (nouveau composant) ───────────────────────────────────
+function PartnerLogoCard({ partner }) {
+  const logoUrl = partner.logo_url || (partner.logo ? `/storage/${partner.logo}` : null)
+
   return (
     <div
-      className="aspect-video rounded-xl border border-gray-800 bg-white/5 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hover:border-[#F0C040]/40 hover:bg-white/10 transition-all group p-4"
+      className="group relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-300 cursor-default"
+      style={{
+        width: '200px',
+        height: '160px',
+        background: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.08)',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+        e.currentTarget.style.borderColor = 'rgba(240,192,64,0.4)'
+        e.currentTarget.style.transform = 'translateY(-4px)'
+        e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.25)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
     >
-      {partner.logo_url ? (
+      {logoUrl ? (
         <img
-          src={partner.logo_url}
+          src={logoUrl}
           alt={partner.name}
-          className="max-h-12 max-w-full object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+          className="object-contain transition-all duration-300"
+          style={{
+            maxWidth: '140px',
+            maxHeight: '80px',
+            filter: 'opacity(0.6)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.filter = ' opacity(1)' }}
+          onMouseLeave={e => { e.currentTarget.style.filter = ' opacity(0.6)' }}
+          onError={e => {
+            e.target.style.display = 'none'
+            const fb = e.target.nextElementSibling
+            if (fb) fb.style.display = 'flex'
+          }}
         />
-      ) : (
-        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-lg font-black text-white/60 group-hover:text-white transition-colors">
-          {partner.name?.charAt(0)}
-        </div>
-      )}
-      <p className="text-xs text-white/40 group-hover:text-white/70 transition-colors text-center font-medium truncate w-full text-center">
+      ) : null}
+
+      {/* Fallback initiale */}
+      <div
+        style={{
+          display: logoUrl ? 'none' : 'flex',
+          width: '64px', height: '64px',
+          borderRadius: '16px',
+          background: 'rgba(255,255,255,0.08)',
+          alignItems: 'center', justifyContent: 'center',
+          fontFamily: '"Playfair Display", serif',
+          fontSize: '28px', fontWeight: 900,
+          color: 'rgba(255,255,255,0.5)',
+        }}
+      >
+        {partner.name?.charAt(0)}
+      </div>
+
+      {/* Nom visible au survol */}
+      <p
+        className="absolute bottom-3 text-center px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-bold uppercase tracking-widest truncate w-full"
+        style={{ color: '#F0C040' }}
+      >
         {partner.name}
       </p>
+
+      {/* Icône lien externe */}
       {partner.website && (
         <a
           href={partner.website}
           target="_blank"
           rel="noopener noreferrer"
+          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={e => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
         >
-          <ExternalLink size={12} className="text-[#F0C040]" />
+          <ExternalLink size={12} style={{ color: 'rgba(240,192,64,0.8)' }} />
         </a>
       )}
     </div>
@@ -309,88 +361,134 @@ export default function HomePage() {
       <Divider />
 
       {/* CANDIDATS */}
-      <section id="candidats" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <Tag>NOS CANDIDATS</Tag>
-              <Title>Les meilleurs <br /><span className="text-[#2A2AE0]">étudiants en licence prof</span></Title>
-              <p className="text-gray-500 text-lg leading-relaxed mb-8">
-                Découvrez les candidats UNEXE sélectionnés parmi les meilleurs étudiants des 5 départements de l'INSTI Lokossa.
-              </p>
-              <button
-                onClick={() => navigate('/candidats')}
-                className="group inline-flex items-center gap-2 px-6 py-3 bg-[#2A2AE0] text-white font-bold rounded-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Voir tous les candidats
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </button>
+<section id="candidats" className="py-24 bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <Tag>NOS CANDIDATS</Tag>
+        <Title>Les meilleurs <br /><span className="text-[#2A2AE0]">étudiants en licence prof</span></Title>
+        <p className="text-gray-500 text-lg leading-relaxed mb-8">
+          Découvrez les candidats UNEXE sélectionnés parmi les meilleurs étudiants des 5 départements de l'INSTI Lokossa.
+        </p>
+        <button
+          onClick={() => navigate('/candidats')}
+          className="group inline-flex items-center gap-2 px-6 py-3 bg-[#2A2AE0] text-white font-bold rounded-full hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+        >
+          Voir tous les candidats
+          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+        </button>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {[
+          { code: 'GEI', name: 'Génie Électrique & Informatique', color: '#2A2AE0', icon: Cpu },
+          { code: 'GC', name: 'Génie Civil', color: '#008751', icon: Home },
+          { code: 'GMP', name: 'Génie Mécanique et Production', color: '#F0C040', icon: Zap },
+          { code: 'GE', name: 'Génie Energétique', color: '#E8112D', icon: Target },
+          { code: 'MS', name: 'Maintenance des Systèmes', color: '#9333EA', icon: Cpu }, // AJOUTÉ
+        ].map(dept => {
+          const Icon = dept.icon
+          return (
+            <div key={dept.code} className="group p-6 rounded-2xl border-2 border-gray-100 hover:border-[#2A2AE0]/20 transition-all cursor-default">
+              <Icon className="w-8 h-8 mb-3" style={{ color: dept.color }} />
+              <p className="text-2xl font-black mb-1" style={{ fontFamily: '"Playfair Display", serif', color: dept.color }}>{dept.code}</p>
+              <p className="text-xs text-gray-400">{dept.name}</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { code: 'GEI', name: 'Génie Électrique & Informatique', color: '#2A2AE0', icon: Cpu },
-                { code: 'GC', name: 'Génie Civil', color: '#008751', icon: Home },
-                { code: 'GMP', name: 'Génie Mécanique et Production', color: '#F0C040', icon: Zap },
-                { code: 'GE', name: 'Génie Energétique', color: '#E8112D', icon: Target },
-              ].map(dept => {
-                const Icon = dept.icon
-                return (
-                  <div key={dept.code} className="group p-6 rounded-2xl border-2 border-gray-100 hover:border-[#2A2AE0]/20 transition-all cursor-default">
-                    <Icon className="w-8 h-8 mb-3" style={{ color: dept.color }} />
-                    <p className="text-2xl font-black mb-1" style={{ fontFamily: '"Playfair Display", serif', color: dept.color }}>{dept.code}</p>
-                    <p className="text-xs text-gray-400">{dept.name}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+          )
+        })}
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          PARTENAIRES — Affichage dynamique depuis l'API
+          PARTENAIRES — NOUVELLE VERSION
       ══════════════════════════════════════════════════════════════════════ */}
-      <section id="partenaires" className="py-24 bg-[#0D0D1A]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <Tag light>PARTENAIRES</Tag>
-          <Title light>
-            Ils soutiennent <br />
-            <span className="text-[#F0C040]">l'excellence</span>
-          </Title>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-12">
-            UNEXE est rendu possible grâce au soutien de partenaires engagés dans la promotion de l'excellence académique.
-          </p>
+      <section id="partenaires" className="py-24 overflow-hidden" style={{ background: '#0D0D1A' }}>
+        <div className="max-w-7xl mx-auto px-6">
+          
+          {/* En-tête */}
+          <div className="text-center mb-14">
+            <div
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full border"
+              style={{ borderColor: 'rgba(240,192,64,0.2)', background: 'rgba(240,192,64,0.05)' }}
+            >
+              <Star size={12} style={{ color: '#F0C040' }} fill="#F0C040" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em]" style={{ color: '#F0C040' }}>
+                Ils nous font confiance
+              </span>
+            </div>
 
+            <h2
+              className="font-black text-white mb-4"
+              style={{ fontFamily: '"Playfair Display", serif', fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.1 }}
+            >
+              Nos partenaires
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Des institutions et entreprises engagées pour valoriser l'excellence académique au Bénin.
+            </p>
+          </div>
+
+          {/* Grille des logos — grands, blancs, aérés */}
           {partners.length > 0 ? (
-            /* Partenaires réels */
-            <div className={`grid gap-6 mb-10 ${
-              partners.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' :
-              partners.length === 2 ? 'grid-cols-2 max-w-md mx-auto' :
-              partners.length === 3 ? 'grid-cols-3 max-w-xl mx-auto' :
-              'grid-cols-2 md:grid-cols-4'
-            }`}>
-              {partners.map(partner => (
-                <PartnerCard key={partner.id} partner={partner} />
-              ))}
+            <div className="flex flex-wrap justify-center gap-5 mb-14">
+              {partners
+                .sort((a, b) => (a.display_order ?? 99) - (b.display_order ?? 99))
+                .map(partner => (
+                  <PartnerLogoCard key={partner.id} partner={partner} />
+                ))
+              }
             </div>
           ) : (
-            /* Placeholders si aucun partenaire */
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="aspect-video rounded-xl border border-gray-800 bg-white/5 backdrop-blur-sm flex items-center justify-center">
-                  <Star className="w-8 h-8 text-gray-700" />
+            <div className="flex flex-wrap justify-center gap-5 mb-14">
+              {[1,2,3,4].map(i => (
+                <div
+                  key={i}
+                  className="rounded-2xl border flex items-center justify-center"
+                  style={{ width:'200px', height:'160px', borderColor:'rgba(255,255,255,0.06)', background:'rgba(255,255,255,0.02)' }}
+                >
+                  <Star size={22} style={{ color:'rgba(255,255,255,0.08)' }} />
                 </div>
               ))}
             </div>
           )}
 
-          <button
-            onClick={() => navigate('/partenaires')}
-            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#F0C040]/30 text-[#F0C040] font-bold rounded-full hover:bg-[#F0C040] hover:text-[#0D0D1A] transition-all"
-          >
-            Voir tous nos partenaires
-            <ArrowRight size={16} />
-          </button>
+          {/* Séparateur + CTA */}
+          <div className="relative mb-10">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+            </div>
+            <div className="relative flex justify-center">
+              <span
+                className="px-6 text-[10px] font-black uppercase tracking-[0.2em]"
+                style={{ background: '#0D0D1A', color: 'rgba(255,255,255,0.2)' }}
+              >
+                UNEXE · INSTI Lokossa
+              </span>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => navigate('/partenaires')}
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm transition-all duration-300 hover:scale-105"
+              style={{ border: '2px solid rgba(240,192,64,0.3)', color: '#F0C040' }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#F0C040'
+                e.currentTarget.style.color = '#0D0D1A'
+                e.currentTarget.style.borderColor = '#F0C040'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = '#F0C040'
+                e.currentTarget.style.borderColor = 'rgba(240,192,64,0.3)'
+              }}
+            >
+              Voir tous nos partenaires
+              <ArrowRight size={16} />
+            </button>
+          </div>
+
         </div>
       </section>
 

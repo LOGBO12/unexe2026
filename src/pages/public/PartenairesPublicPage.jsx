@@ -2,419 +2,420 @@ import { useEffect, useState } from 'react'
 import api from '../../api/axios'
 import Navbar from '../../components/public/Navbar'
 import Footer from '../../components/public/Footer'
-import { ExternalLink, Mail, Phone, Globe, Star, Award, Zap, Heart } from 'lucide-react'
+import { ExternalLink, Mail, Globe, ArrowUpRight, Star } from 'lucide-react'
 
-const TIER_CONFIG = {
-  or:       { label: 'Partenaire Or',      color: '#F0C040', bg: 'rgba(240,192,64,0.08)',  border: 'rgba(240,192,64,0.3)',  icon: Star,  size: 'large'  },
-  argent:   { label: 'Partenaire Argent',  color: '#9CA3AF', bg: 'rgba(156,163,175,0.07)', border: 'rgba(156,163,175,0.25)', icon: Award, size: 'medium' },
-  bronze:   { label: 'Partenaire Bronze',  color: '#CD7F32', bg: 'rgba(205,127,50,0.07)',  border: 'rgba(205,127,50,0.25)', icon: Zap,   size: 'small'  },
-  soutien:  { label: 'Partenaire Soutien', color: '#2A2AE0', bg: 'rgba(42,42,224,0.06)',   border: 'rgba(42,42,224,0.2)',   icon: Heart, size: 'small'  },
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+function getLogoUrl(partner) {
+  if (partner.logo_url) return partner.logo_url
+  if (partner.logo)     return `/storage/${partner.logo}`
+  return null
 }
 
-function Tag({ children, light = false }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] px-3.5 py-1.5 rounded-full mb-5"
-      style={
-        light
-          ? { background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)' }
-          : { background: 'rgba(42,42,224,0.09)', color: '#2A2AE0', border: '1px solid rgba(42,42,224,0.2)' }
-      }
-    >
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: light ? 'rgba(255,255,255,0.7)' : '#2A2AE0' }} />
-      {children}
-    </span>
-  )
-}
-
-function PartnerCard({ partner, size = 'medium' }) {
-  // Construire l'URL du logo correctement
-  const logoUrl = partner.logo_url || (partner.logo ? `/storage/${partner.logo}` : null)
-  const tier = TIER_CONFIG[partner.tier] || TIER_CONFIG.soutien
-  const isLarge  = size === 'large'
-  const isMedium = size === 'medium'
+/* ─── Composant : grande carte partenaire ─────────────────────────────────── */
+function PartnerCard({ partner, index }) {
+  const logoUrl = getLogoUrl(partner)
+  const isEven  = index % 2 === 0
 
   return (
-    <div
-      className="group bg-white rounded-3xl overflow-hidden border transition-all duration-400 flex flex-col"
+    <article
+      className="group relative flex flex-col md:flex-row gap-0 overflow-hidden rounded-3xl border transition-all duration-500"
       style={{
-        borderColor: tier.border,
-        boxShadow: `0 4px 20px ${tier.color}10`,
+        background: '#FFFFFF',
+        borderColor: 'rgba(13,13,26,0.07)',
+        boxShadow: '0 2px 24px rgba(13,13,26,0.04)',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.boxShadow = `0 20px 50px ${tier.color}25`
-        e.currentTarget.style.transform = 'translateY(-4px)'
-        e.currentTarget.style.borderColor = tier.color + '60'
+        e.currentTarget.style.boxShadow = '0 16px 56px rgba(42,42,224,0.12)'
+        e.currentTarget.style.borderColor = 'rgba(42,42,224,0.2)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.boxShadow = `0 4px 20px ${tier.color}10`
+        e.currentTarget.style.boxShadow = '0 2px 24px rgba(13,13,26,0.04)'
+        e.currentTarget.style.borderColor = 'rgba(13,13,26,0.07)'
         e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.borderColor = tier.border
       }}
     >
-      <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${tier.color}, ${tier.color}80)` }} />
-
-      {/* Logo */}
+      {/* Numéro décoratif */}
       <div
-        className="flex items-center justify-center p-8"
+        className="absolute top-5 right-6 text-7xl font-black leading-none select-none pointer-events-none"
         style={{
-          minHeight: isLarge ? '180px' : isMedium ? '140px' : '110px',
-          background: tier.bg,
+          fontFamily: '"Playfair Display", serif',
+          color: 'rgba(42,42,224,0.04)',
+          zIndex: 0,
         }}
       >
+        {String(index + 1).padStart(2, '0')}
+      </div>
+
+      {/* Zone logo — grande, aérée */}
+      <div
+        className="relative flex-shrink-0 flex items-center justify-center"
+        style={{
+          width: '100%',
+          maxWidth: '340px',
+          minHeight: '220px',
+          background: 'linear-gradient(135deg, #F8F8FF 0%, #EEEEFF 100%)',
+          borderRight: '1px solid rgba(42,42,224,0.07)',
+        }}
+      >
+        {/* Grille de points décorative */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(42,42,224,0.15) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+
         {logoUrl ? (
           <img
             src={logoUrl}
-            alt={partner.name}
-            className="max-h-20 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
+            alt={`Logo ${partner.name}`}
+            className="relative z-10 object-contain transition-transform duration-500 group-hover:scale-105"
+            style={{ maxWidth: '200px', maxHeight: '120px' }}
+            onError={e => {
               e.target.style.display = 'none'
-              e.target.parentElement.innerHTML += `<div style="width:64px;height:64px;border-radius:16px;background:${tier.color}20;color:${tier.color};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;font-family:'Playfair Display',serif">${partner.name?.charAt(0) || '?'}</div>`
+              e.target.parentElement.querySelector('.fallback-logo').style.display = 'flex'
             }}
           />
-        ) : (
-          <div className="text-center">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl font-black"
-              style={{ background: tier.color + '20', color: tier.color, fontFamily: '"Playfair Display", serif' }}
-            >
-              {partner.name?.charAt(0)}
-            </div>
-          </div>
-        )}
+        ) : null}
+
+        {/* Fallback initiale */}
+        <div
+          className="fallback-logo relative z-10 w-24 h-24 rounded-3xl items-center justify-center text-4xl font-black text-white"
+          style={{
+            display: logoUrl ? 'none' : 'flex',
+            background: 'linear-gradient(135deg, #2A2AE0, #1A1A8B)',
+            fontFamily: '"Playfair Display", serif',
+            boxShadow: '0 8px 32px rgba(42,42,224,0.35)',
+          }}
+        >
+          {partner.name?.charAt(0)}
+        </div>
       </div>
 
-      {/* Contenu */}
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: tier.color }} />
-          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: tier.color }}>
-            {tier.label}
+      {/* Contenu textuel */}
+      <div className="relative flex-1 p-8 flex flex-col justify-between z-10">
+        <div>
+          {/* Numéro d'ordre */}
+          <span
+            className="inline-block text-xs font-black uppercase tracking-[0.25em] mb-3 px-3 py-1 rounded-full"
+            style={{ background: 'rgba(42,42,224,0.07)', color: '#2A2AE0' }}
+          >
+            Partenaire #{String(index + 1).padStart(2, '0')}
           </span>
+
+          <h2
+            className="text-2xl font-black mb-3 leading-tight"
+            style={{ fontFamily: '"Playfair Display", serif', color: '#08081A' }}
+          >
+            {partner.name}
+          </h2>
+
+          {partner.contribution && (
+            <p
+              className="text-base leading-relaxed"
+              style={{ color: 'rgba(13,13,26,0.55)', maxWidth: '480px' }}
+            >
+              {partner.contribution}
+            </p>
+          )}
         </div>
 
-        <h3
-          className="font-bold text-base mb-2"
-          style={{ color: '#0D0D1A', fontFamily: '"Playfair Display", serif' }}
-        >
-          {partner.name}
-        </h3>
-
-        {(partner.contribution || partner.description) && (
-          <p className="text-sm leading-relaxed flex-1 mb-4" style={{ color: 'rgba(13,13,26,0.5)' }}>
-            {partner.contribution || partner.description}
-          </p>
-        )}
-
-        {(partner.website || partner.email) && (
-          <div className="flex flex-wrap gap-2 pt-3 border-t mt-auto" style={{ borderColor: `${tier.color}20` }}>
-            {partner.website && (
-              <a
-                href={partner.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
-                style={{ background: tier.bg, color: tier.color, border: `1px solid ${tier.border}` }}
-              >
-                <Globe size={11} />
-                Site web
-                <ExternalLink size={10} />
-              </a>
-            )}
-            {partner.email && (
-              <a
-                href={`mailto:${partner.email}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
-                style={{ background: 'rgba(42,42,224,0.06)', color: '#2A2AE0', border: '1px solid rgba(42,42,224,0.15)' }}
-              >
-                <Mail size={11} />
-                Contact
-              </a>
-            )}
-          </div>
-        )}
+        {/* Liens */}
+        <div className="flex flex-wrap gap-3 mt-6">
+          {partner.website && (
+            <a
+              href={partner.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 hover:scale-105"
+              style={{
+                background: '#2A2AE0',
+                color: '#FFFFFF',
+                boxShadow: '0 4px 16px rgba(42,42,224,0.3)',
+              }}
+            >
+              <Globe size={14} />
+              Visiter le site
+              <ArrowUpRight size={13} />
+            </a>
+          )}
+          {partner.email && (
+            <a
+              href={`mailto:${partner.email}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm border transition-all duration-200 hover:bg-gray-50"
+              style={{ borderColor: 'rgba(13,13,26,0.12)', color: 'rgba(13,13,26,0.65)' }}
+            >
+              <Mail size={14} />
+              Contact
+            </a>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   )
 }
 
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
 function PartnerSkeleton() {
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border animate-pulse" style={{ borderColor: 'rgba(42,42,224,0.08)' }}>
-      <div className="h-1.5 bg-gray-100" />
-      <div className="h-36 bg-gray-50" />
-      <div className="p-5 space-y-2">
-        <div className="h-3 bg-gray-100 rounded w-1/3" />
-        <div className="h-5 bg-gray-100 rounded w-3/4" />
-        <div className="h-3 bg-gray-100 rounded w-full" />
-        <div className="h-3 bg-gray-100 rounded w-5/6" />
+    <div
+      className="rounded-3xl border overflow-hidden animate-pulse"
+      style={{ borderColor: 'rgba(13,13,26,0.06)', background: '#FFFFFF' }}
+    >
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-80 h-52" style={{ background: '#F3F3FA' }} />
+        <div className="flex-1 p-8 space-y-4">
+          <div className="h-4 w-28 rounded-full" style={{ background: '#EEEEFF' }} />
+          <div className="h-7 w-2/3 rounded-lg" style={{ background: '#F3F3FA' }} />
+          <div className="h-4 w-full rounded" style={{ background: '#F8F8FF' }} />
+          <div className="h-4 w-5/6 rounded" style={{ background: '#F8F8FF' }} />
+          <div className="flex gap-3 pt-2">
+            <div className="h-10 w-32 rounded-xl" style={{ background: '#EEEEFF' }} />
+            <div className="h-10 w-24 rounded-xl" style={{ background: '#F3F3FA' }} />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
+/* ─── PAGE ────────────────────────────────────────────────────────────────── */
 export default function PartenairesPublicPage() {
   const [partners, setPartners] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    // ✅ Correction : appel vers /public/partners (et non /public/partenaires)
     api.get('/public/partners')
       .then(res => {
-        // L'API peut retourner un tableau direct ou { partners: [...] }
         const data = res.data
-        if (Array.isArray(data)) {
-          setPartners(data)
-        } else if (Array.isArray(data?.partenaires)) {
-          setPartners(data.partenaires)
-        } else if (Array.isArray(data?.partners)) {
-          setPartners(data.partners)
-        } else {
-          setPartners([])
-        }
+        if (Array.isArray(data))              setPartners(data)
+        else if (Array.isArray(data?.partners)) setPartners(data.partners)
+        else                                   setPartners([])
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])
 
-  // Grouper par tier (si le champ existe), sinon tout mettre en "soutien"
-  const grouped = partners.reduce((acc, p) => {
-    const t = p.tier || 'soutien'
-    if (!acc[t]) acc[t] = []
-    acc[t].push(p)
-    return acc
-  }, {})
-
-  const tierOrder = ['or', 'argent', 'bronze', 'soutien']
-  const hasData   = !loading && !error && partners.length > 0
-
   return (
-    <div className="min-h-screen" style={{ background: '#F7F7FC', fontFamily: '"DM Sans", "Segoe UI", sans-serif' }}>
+    <div
+      className="min-h-screen"
+      style={{ background: '#F7F7FC', fontFamily: '"DM Sans", "Segoe UI", sans-serif' }}
+    >
       <Navbar />
 
-      {/* HERO */}
+      {/* ── HERO ────────────────────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden pt-32 pb-20 px-6"
-        style={{ background: 'linear-gradient(135deg, #08081A 0%, #0D0D2B 55%, #1A1A6A 100%)' }}
+        className="relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(160deg, #08081A 0%, #0D0D2B 60%, #18184A 100%)',
+          paddingTop: '120px',
+          paddingBottom: '96px',
+        }}
       >
+        {/* Motif hexagonal subtil */}
         <div
-          className="absolute inset-0 opacity-[0.05]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='92' viewBox='0 0 80 92' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='40,3 77,23 77,69 40,89 3,69 3,23' fill='none' stroke='%232A2AE0' stroke-width='1.5'/%3E%3C/svg%3E")`,
             backgroundSize: '80px 92px',
           }}
         />
+        {/* Halo gauche */}
         <div
-          className="absolute -top-32 right-0 w-[500px] h-[500px] rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #F0C040 0%, transparent 70%)', filter: 'blur(100px)' }}
+          className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #2A2AE0, transparent 70%)', filter: 'blur(100px)' }}
         />
+        {/* Halo doré droit */}
         <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-15"
-          style={{ background: 'radial-gradient(circle, #2A2AE0 0%, transparent 70%)', filter: 'blur(80px)' }}
+          className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #F0C040, transparent 70%)', filter: 'blur(80px)' }}
         />
 
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <Tag light>Partenaires</Tag>
+        <div className="relative z-10 max-w-5xl mx-auto px-6">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)' }}>
+            <Star size={12} style={{ color: '#F0C040' }} fill="#F0C040" />
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/60">
+              Partenaires UNEXE
+            </span>
+          </div>
+
           <h1
-            className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-4"
-            style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+            className="font-black text-white leading-none mb-6"
+            style={{
+              fontFamily: '"Playfair Display", Georgia, serif',
+              fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+            }}
           >
             Ils croient en<br />
-            <span style={{ color: '#F0C040' }}>l'excellence</span>
+            <span style={{
+              background: 'linear-gradient(90deg, #F0C040, #FFD700)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              l'excellence
+            </span>
           </h1>
-          <p className="text-white/50 text-lg max-w-xl leading-relaxed">
-            UNEXE est porté par des partenaires engagés dans la promotion du capital humain et de l'excellence académique au Bénin.
-          </p>
-        </div>
-      </section>
 
-      {/* TIERS */}
-      <section className="py-14 px-6 border-b" style={{ background: '#FFFFFF', borderColor: 'rgba(42,42,224,0.07)' }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-center mb-8" style={{ color: 'rgba(13,13,26,0.3)' }}>
-            Niveaux de partenariat
+          <p
+            className="text-lg leading-relaxed max-w-xl"
+            style={{ color: 'rgba(255,255,255,0.45)' }}
+          >
+            UNEXE est porté par des institutions et entreprises engagées dans la
+            promotion du capital humain et de l'excellence académique au Bénin.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {tierOrder.map(t => {
-              const conf = TIER_CONFIG[t]
-              const Icon = conf.icon
-              const count = grouped[t]?.length || 0
-              return (
-                <div
-                  key={t}
-                  className="rounded-2xl p-5 border text-center transition-all duration-200"
-                  style={{ background: conf.bg, borderColor: conf.border }}
-                >
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ background: conf.color + '20', color: conf.color }}
-                  >
-                    <Icon size={18} />
-                  </div>
-                  <p className="font-black text-sm mb-1" style={{ color: conf.color }}>{conf.label}</p>
-                  <p className="text-xs" style={{ color: 'rgba(13,13,26,0.4)' }}>
-                    {count > 0 ? `${count} partenaire${count > 1 ? 's' : ''}` : 'Places disponibles'}
-                  </p>
-                </div>
-              )
-            })}
+
+          {/* Séparateur décoratif */}
+          <div className="flex items-center gap-4 mt-10">
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(42,42,224,0.6), transparent)' }} />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/20">
+              {!loading && `${partners.length} partenaire${partners.length !== 1 ? 's' : ''}`}
+            </span>
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(270deg, rgba(42,42,224,0.6), transparent)' }} />
           </div>
         </div>
       </section>
 
-      {/* CONTENU */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      {/* ── LISTE DES PARTENAIRES ────────────────────────────────────────── */}
+      <section className="max-w-5xl mx-auto px-6 py-20">
 
+        {/* Loading */}
         {loading && (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => <PartnerSkeleton key={i} />)}
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => <PartnerSkeleton key={i} />)}
           </div>
         )}
 
+        {/* Erreur */}
         {!loading && error && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">⚠️</div>
-            <p className="text-lg font-bold" style={{ color: '#0D0D1A' }}>Impossible de charger les partenaires</p>
-            <p className="text-sm mt-1" style={{ color: 'rgba(13,13,26,0.4)' }}>Vérifiez votre connexion et réessayez.</p>
+          <div className="text-center py-28">
+            <div className="text-5xl mb-4">⚠️</div>
+            <p className="text-lg font-bold text-gray-800">Chargement impossible</p>
+            <p className="text-sm text-gray-400 mt-1">Vérifiez votre connexion et réessayez.</p>
           </div>
         )}
 
+        {/* Aucun partenaire */}
         {!loading && !error && partners.length === 0 && (
-          <div className="text-center py-20">
+          <div className="text-center py-28">
             <div
-              className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-5"
+              className="w-20 h-20 rounded-3xl mx-auto flex items-center justify-center mb-6"
               style={{ background: 'rgba(240,192,64,0.1)' }}
             >
               <Star size={32} style={{ color: '#F0C040' }} />
             </div>
-            <p className="text-lg font-bold mb-2" style={{ color: '#0D0D1A' }}>Aucun partenaire pour le moment</p>
-            <p className="text-sm" style={{ color: 'rgba(13,13,26,0.4)' }}>
-              Nous sommes à la recherche de partenaires engagés. Rejoignez l'aventure UNEXE !
+            <p className="text-xl font-bold text-gray-800 mb-2">Aucun partenaire enregistré</p>
+            <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
+              Nous recherchons des partenaires engagés pour soutenir l'excellence académique. Rejoignez l'aventure UNEXE !
             </p>
+            <a
+              href="mailto:contact@unexe.bj"
+              className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl font-bold text-sm text-white"
+              style={{ background: '#2A2AE0' }}
+            >
+              <Mail size={14} />
+              Devenir partenaire
+            </a>
           </div>
         )}
 
-        {/* Partenaires groupés — si le modèle a un champ tier */}
-        {hasData && Object.values(grouped).some(g => g.length > 0) && (
-          <div className="space-y-16">
-            {tierOrder.map(tier => {
-              if (!grouped[tier]?.length) return null
-              const conf = TIER_CONFIG[tier]
-              const Icon = conf.icon
-              return (
-                <div key={tier}>
-                  <div className="flex items-center gap-4 mb-8">
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: conf.color + '15', color: conf.color }}
-                    >
-                      <Icon size={22} />
-                    </div>
-                    <div className="flex-1">
-                      <h2
-                        className="text-2xl font-black leading-none mb-1"
-                        style={{ fontFamily: '"Playfair Display", serif', color: conf.color }}
-                      >
-                        {conf.label}s
-                      </h2>
-                      <p className="text-xs" style={{ color: 'rgba(13,13,26,0.35)' }}>
-                        {grouped[tier].length} partenaire{grouped[tier].length > 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <div className="flex-1 h-px ml-4" style={{ background: `linear-gradient(90deg, ${conf.color}30, transparent)` }} />
-                  </div>
+        {/* Partenaires — liste verticale avec grandes cartes */}
+        {!loading && !error && partners.length > 0 && (
+          <div className="space-y-6">
+            {/* Titre de section */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs font-black uppercase tracking-[0.25em] text-gray-400 px-4">
+                Nos partenaires
+              </span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
 
-                  <div className={`grid gap-5 ${
-                    tier === 'or'
-                      ? 'sm:grid-cols-2 md:grid-cols-3'
-                      : tier === 'argent'
-                      ? 'sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-                      : 'sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-                  }`}>
-                    {grouped[tier].map(p => (
-                      <PartnerCard key={p.id} partner={p} size={conf.size} />
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
+            {partners
+              .sort((a, b) => (a.display_order ?? 99) - (b.display_order ?? 99))
+              .map((partner, i) => (
+                <PartnerCard key={partner.id} partner={partner} index={i} />
+              ))
+            }
           </div>
         )}
       </section>
 
-      {/* DEVENIR PARTENAIRE */}
+      {/* ── CTA DEVENIR PARTENAIRE ───────────────────────────────────────── */}
       <section
-        className="py-20 px-6"
-        style={{ background: 'linear-gradient(135deg, #0D0D1A 0%, #1A1A4A 100%)' }}
+        className="py-24 px-6"
+        style={{
+          background: 'linear-gradient(160deg, #08081A 0%, #0D0D2B 100%)',
+          borderTop: '1px solid rgba(42,42,224,0.15)',
+        }}
       >
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <Tag light>Rejoindre l'aventure</Tag>
+              <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full border"
+                style={{ borderColor: 'rgba(240,192,64,0.25)', background: 'rgba(240,192,64,0.05)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F0C040]" />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#F0C040]">
+                  Rejoindre l'aventure
+                </span>
+              </div>
               <h2
-                className="text-3xl md:text-4xl font-black text-white mb-4"
-                style={{ fontFamily: '"Playfair Display", serif' }}
+                className="font-black text-white leading-tight mb-4"
+                style={{ fontFamily: '"Playfair Display", serif', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}
               >
                 Devenez partenaire<br />
                 <span style={{ color: '#F0C040' }}>UNEXE</span>
               </h2>
-              <p className="text-white/50 leading-relaxed">
-                Soutenez l'excellence académique à l'INSTI Lokossa et bénéficiez d'une visibilité auprès des meilleurs étudiants et futurs talents du Bénin.
+              <p className="text-white/45 leading-relaxed">
+                Soutenez l'excellence académique à l'INSTI Lokossa. Bénéficiez d'une
+                visibilité auprès des meilleurs étudiants et futurs talents du Bénin.
               </p>
             </div>
+
+            {/* Contact card */}
             <div
               className="rounded-3xl p-8 border"
-              style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(240,192,64,0.2)' }}
+              style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(240,192,64,0.15)' }}
             >
               <h3 className="text-white font-bold text-lg mb-6">Nous contacter</h3>
               <div className="space-y-4">
-                <a
-                  href="mailto:contact@unexe.bj"
-                  className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group"
-                >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(42,42,224,0.15)', color: '#A5A5FF' }}>
-                    <Mail size={16} />
+                <a href="mailto:contact@unexe.bj"
+                  className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(42,42,224,0.15)', color: '#A5A5FF' }}>
+                    <Mail size={15} />
                   </div>
                   <div>
-                    <p className="text-xs text-white/30 mb-0.5">Email</p>
+                    <p className="text-[10px] text-white/25 mb-0.5 uppercase tracking-wider">Email</p>
                     <p className="text-sm font-semibold">contact@unexe.bj</p>
                   </div>
                 </a>
-                <a
-                  href="tel:+22900000000"
-                  className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group"
-                >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,135,81,0.15)', color: '#4DC896' }}>
-                    <Phone size={16} />
+                <a href="https://unexe.bj" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(240,192,64,0.12)', color: '#F0C040' }}>
+                    <Globe size={15} />
                   </div>
                   <div>
-                    <p className="text-xs text-white/30 mb-0.5">Téléphone</p>
-                    <p className="text-sm font-semibold">+229 00 00 00 00</p>
-                  </div>
-                </a>
-                <a
-                  href="https://unexe.bj"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group"
-                >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(240,192,64,0.15)', color: '#F0C040' }}>
-                    <Globe size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-white/30 mb-0.5">Site web</p>
+                    <p className="text-[10px] text-white/25 mb-0.5 uppercase tracking-wider">Site web</p>
                     <p className="text-sm font-semibold">unexe.bj</p>
                   </div>
                 </a>
               </div>
+
               <a
                 href="mailto:contact@unexe.bj"
-                className="mt-6 w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold rounded-2xl transition-all duration-200 hover:scale-105"
-                style={{ background: '#F0C040', color: '#0D0D1A' }}
+                className="mt-8 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 hover:scale-[1.02]"
+                style={{ background: 'linear-gradient(90deg, #F0C040, #E8A800)', color: '#08081A' }}
               >
-                Devenir partenaire →
+                Devenir partenaire
+                <ArrowUpRight size={15} />
               </a>
             </div>
           </div>

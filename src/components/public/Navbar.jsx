@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 
 const navLinks = [
   { label: 'Le Comité',     href: '#comite' },
-  { label: 'Nos Candidats', href: '#candidats' },
+  { label: 'Nos Candidats', href: '/candidats' },
   { label: 'Partenaires',   href: '#partenaires' },
   { label: 'À propos',      href: '#about' },
 ]

@@ -42,7 +42,7 @@ export default function ProfilePage() {
     if (avatar) fd.append('photo', avatar)
 
     try {
-      await api.post('/profile/update', fd, {
+      await api.post('/admin/profile/update', fd, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setSuccess('Profil mis à jour avec succès !')
@@ -71,7 +71,7 @@ export default function ProfilePage() {
     }
 
     try {
-      await api.put('/profile/password', {
+      await api.put('/admin/profile/password', {
         current_password:      form.current_password,
         password:              form.password,
         password_confirmation: form.password_confirmation,
