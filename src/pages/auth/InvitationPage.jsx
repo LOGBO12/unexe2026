@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
+import { useAuth } from '../../context/AuthContext'
 import { 
   Mail, Lock, Eye, EyeOff, CheckCircle, 
   Sparkles, AlertCircle, UserCheck, Shield,
@@ -8,19 +9,21 @@ import {
 } from 'lucide-react'
 
 export default function InvitationPage() {
-  const { token } = useParams()
+  const { token }  = useParams()
+  const navigate   = useNavigate()
+  const { login }  = useAuth()   // ← auto-login après activation
 
   const [invitation, setInvitation] = useState(null)
   const [checking, setChecking]     = useState(true)
   const [tokenError, setTokenError] = useState(null)
-  const [success, setSuccess]       = useState(false)
+  const [activating, setActivating] = useState(false) // animation redirection
 
   const [form, setForm] = useState({ 
     password: '', 
     password_confirmation: '' 
   })
-  const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
+  const [errors, setErrors]             = useState({})
+  const [loading, setLoading]           = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -49,7 +52,6 @@ export default function InvitationPage() {
     setLoading(true)
     setErrors({})
 
-    // Validation côté client
     if (form.password.length < 8) {
       setErrors({ password: ['Le mot de passe doit contenir au moins 8 caractères.'] })
       setLoading(false)
@@ -63,12 +65,30 @@ export default function InvitationPage() {
     }
 
     try {
+      // 1. Activer le compte
       await api.post(`/invitation/${token}/activate`, {
         password: form.password,
         password_confirmation: form.password_confirmation,
       })
-      setSuccess(true)
+
+      // 2. Connexion automatique avec l'email de l'invitation
+      setActivating(true)
+      const user = await login(invitation.email, form.password)
+
+      // 3. Redirection vers le bon espace selon le rôle
+      if (user.role === 'candidat') {
+        if (!user.is_profile_complete) {
+          navigate('/complete-profile', { replace: true })
+        } else {
+          navigate('/espace-candidat', { replace: true })
+        }
+      } else {
+        // comite ou super_admin → espace administration
+        navigate('/dashboard', { replace: true })
+      }
+
     } catch (err) {
+      setActivating(false)
       const status = err.response?.status
       if (status === 422) {
         setErrors(err.response.data.errors || {})
@@ -82,7 +102,7 @@ export default function InvitationPage() {
     }
   }
 
-  // Chargement
+  // ── Chargement ────────────────────────────────────────────────────────────
   if (checking) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
       <div className="text-center">
@@ -92,11 +112,24 @@ export default function InvitationPage() {
     </div>
   )
 
-  // Token invalide / expiré
+  // ── Redirection en cours ──────────────────────────────────────────────────
+  if (activating) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle size={40} className="text-green-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Compte activé !</h2>
+        <div className="w-10 h-10 border-4 border-[#2A2AE0] border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-gray-500">Redirection vers votre espace...</p>
+      </div>
+    </div>
+  )
+
+  // ── Token invalide / expiré ───────────────────────────────────────────────
   if (tokenError) return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
@@ -113,113 +146,34 @@ export default function InvitationPage() {
             UNEXE
           </h1>
         </div>
-
-        {/* Carte d'erreur */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100 text-center">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle size={40} className="text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">Invitation invalide</h2>
           <p className="text-gray-500 text-sm mb-6">{tokenError}</p>
-          <Link
-            to="/login"
+          <button
+            onClick={() => navigate('/login')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#2A2AE0] hover:bg-[#1A1AB0] text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
           >
             <ArrowLeft size={16} />
             Retour à la connexion
-          </Link>
+          </button>
         </div>
       </div>
     </div>
   )
 
-  // Succès : compte activé
-  if (success) return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src="/unexe-logo.jpeg" 
-              alt="UNEXE Logo" 
-              className="w-16 h-16 object-contain rounded-xl"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML += '<div class="w-16 h-16 bg-[#2A2AE0] rounded-xl flex items-center justify-center text-white text-2xl font-black">U</div>';
-              }}
-            />
-          </div>
-          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Playfair Display", serif' }}>
-            UNEXE
-          </h1>
-        </div>
-
-        {/* Carte de succès */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100">
-          <div className="text-center space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle size={40} className="text-green-500" />
-            </div>
-            
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Compte activé !</h2>
-              <p className="text-gray-500 text-sm">
-                {invitation?.role === 'comite'
-                  ? 'Bienvenue dans l\'équipe UNEXE ! Connectez-vous pour accéder à votre espace administrateur.'
-                  : 'Bienvenue sur UNEXE ! Connectez-vous puis complétez votre profil candidat.'
-                }
-              </p>
-            </div>
-
-            {/* Carte des identifiants */}
-            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 text-left space-y-3">
-              <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
-                <Mail size={16} className="text-[#2A2AE0]" />
-                <span className="text-sm font-medium text-gray-700">Email</span>
-              </div>
-              <p className="text-sm text-gray-600 pl-7">{invitation?.email}</p>
-              
-              <div className="flex items-center gap-3 pt-2">
-                <Shield size={16} className="text-[#2A2AE0]" />
-                <span className="text-sm font-medium text-gray-700">Rôle</span>
-              </div>
-              <p className="pl-7">
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                  ${invitation?.role === 'comite' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'bg-green-100 text-green-700'}`}
-                >
-                  <UserCheck size={12} />
-                  {invitation?.role === 'comite' ? 'Membre du Comité' : 'Candidat UNEXE'}
-                </span>
-              </p>
-            </div>
-
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#2A2AE0] hover:bg-[#1A1AB0] text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group"
-            >
-              Se connecter maintenant
-              <Send size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  // Formulaire
+  // ── Formulaire principal ──────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-8">
-      {/* Éléments décoratifs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#2A2AE0] rounded-full opacity-5 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#E8112D] rounded-full opacity-5 blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo centré */}
+        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img 
@@ -242,7 +196,7 @@ export default function InvitationPage() {
           </p>
         </div>
 
-        {/* Carte d'invitation */}
+        {/* Carte */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 border border-gray-100">
           
           {/* Badge invitation */}
@@ -262,6 +216,21 @@ export default function InvitationPage() {
                 {invitation?.role === 'comite' ? 'Membre du Comité' : 'Candidat UNEXE'}
               </span>
             </div>
+          </div>
+
+          {/* Destination info */}
+          <div className="mb-6 p-4 rounded-xl border" style={{
+            background: invitation?.role === 'comite' ? 'rgba(42,42,224,0.04)' : 'rgba(77,200,150,0.04)',
+            borderColor: invitation?.role === 'comite' ? 'rgba(42,42,224,0.15)' : 'rgba(77,200,150,0.15)',
+          }}>
+            <p className="text-xs flex items-center gap-2" style={{
+              color: invitation?.role === 'comite' ? '#2A2AE0' : '#059669'
+            }}>
+              <Shield size={13} />
+              {invitation?.role === 'comite'
+                ? 'Vous serez redirigé vers l\'espace d\'administration après activation.'
+                : 'Vous serez redirigé vers votre espace candidat après activation.'}
+            </p>
           </div>
 
           <div className="mb-8">
@@ -395,28 +364,6 @@ export default function InvitationPage() {
               )}
             </button>
           </form>
-
-          {/* Séparateur */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-4 bg-white text-gray-400">ou</span>
-            </div>
-          </div>
-
-          {/* Lien connexion */}
-          <p className="text-center text-sm text-gray-500">
-            Déjà un compte ?{' '}
-            <Link
-              to="/login"
-              className="text-[#2A2AE0] font-semibold hover:underline inline-flex items-center gap-1 group"
-            >
-              Se connecter
-              <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            </Link>
-          </p>
 
           {/* Badge de sécurité */}
           <div className="mt-8 flex items-center justify-center gap-2 text-xs text-gray-400">

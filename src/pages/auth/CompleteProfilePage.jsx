@@ -280,7 +280,7 @@ export default function CompleteProfilePage() {
               )}
             </div>
 
-            {/* Téléphone */}
+            {/* Téléphone 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Numéro de téléphone
@@ -298,7 +298,7 @@ export default function CompleteProfilePage() {
                 />
               </div>
             </div>
-
+*/}
             {/* Bouton de validation */}
             <button
               type="submit"

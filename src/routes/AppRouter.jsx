@@ -2,12 +2,12 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
-import LoginPage           from '../pages/auth/LoginPage'
-import RegisterPage        from '../pages/auth/RegisterPage'
-import ForgotPasswordPage  from '../pages/auth/ForgotPasswordPage'
-import ResetPasswordPage   from '../pages/auth/ResetPasswordPage'
-import InvitationPage      from '../pages/auth/InvitationPage'
-import CompleteProfilePage from '../pages/auth/CompleteProfilePage'
+import LoginPage               from '../pages/auth/LoginPage'
+import RegisterPage            from '../pages/auth/RegisterPage'
+import ForgotPasswordPage      from '../pages/auth/ForgotPasswordPage'
+import ResetPasswordPage       from '../pages/auth/ResetPasswordPage'
+import InvitationPage          from '../pages/auth/InvitationPage'
+import CompleteProfilePage     from '../pages/auth/CompleteProfilePage'
 
 import MainLayout from '../layouts/MainLayout'
 
@@ -17,16 +17,17 @@ import CandidatsPublicPage   from '../pages/public/CandidatsPublicPage'
 import PartenairesPublicPage from '../pages/public/PartenairesPublicPage'
 
 // Pages admin
-import DashboardPage        from '../pages/admin/DashboardPage'
-import InvitationsPage      from '../pages/admin/InvitationsPage'
-import CandidaturesPage     from '../pages/admin/CandidaturesPage'
-import CandidatsAdminPage   from '../pages/admin/CandidatsPage'
-import ComiteMembresPage    from '../pages/admin/ComiteMembresPage'
-import ComitePageEditor     from '../pages/admin/ComitePageEditor'
-import PartenairesAdminPage from '../pages/admin/PartenairesPage'
-import LogsPage             from '../pages/admin/LogsPage'
-import ForumPage            from '../pages/admin/ForumPage'
-import ProfilePage          from '../pages/admin/ProfilePage'
+import DashboardPage             from '../pages/admin/DashboardPage'
+import InvitationsPage           from '../pages/admin/InvitationsPage'
+import CandidaturesPage          from '../pages/admin/CandidaturesPage'
+import CandidatsAdminPage        from '../pages/admin/CandidatsPage'
+import ComiteMembresPage         from '../pages/admin/ComiteMembresPage'
+import ComitePageEditor          from '../pages/admin/ComitePageEditor'
+import PartenairesAdminPage      from '../pages/admin/PartenairesPage'
+import LogsPage                  from '../pages/admin/LogsPage'
+import ForumPage                 from '../pages/admin/ForumPage'
+import ProfilePage               from '../pages/admin/ProfilePage'
+import RegistrationSettingsPage  from '../pages/admin/RegistrationSettingsPage'  // ← NOUVEAU
 
 // Pages candidat
 import EspaceCandidatLayout from '../layouts/EspaceCandidatLayout'
@@ -61,10 +62,6 @@ function GuestRoute({ children }) {
   return <Navigate to="/dashboard" replace />
 }
 
-/**
- * Route forum : accessible uniquement aux candidats validés
- * Les non-validés sont redirigés vers le dashboard candidat
- */
 function ValidatedCandidateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingSpinner />
@@ -116,7 +113,14 @@ export default function AppRouter() {
           <Route path="/dashboard/partenaires"  element={<PartenairesAdminPage />} />
           <Route path="/dashboard/forum"        element={<ForumPage />} />
           <Route path="/profil"                 element={<ProfilePage />} />
-          <Route path="/dashboard/comite/page"  element={
+
+          {/* ── Super Admin uniquement ──────────────────────────────── */}
+          <Route path="/dashboard/registration" element={
+            <PrivateRoute roles={['super_admin']}>
+              <RegistrationSettingsPage />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/comite/page" element={
             <PrivateRoute roles={['super_admin']}>
               <ComitePageEditor />
             </PrivateRoute>
@@ -134,12 +138,9 @@ export default function AppRouter() {
             <EspaceCandidatLayout />
           </PrivateRoute>
         }>
-          {/* Accessible à tous les candidats */}
           <Route path="/espace-candidat"         element={<CandidatDashboard />} />
           <Route path="/espace-candidat/dossier" element={<DeposerDossier />} />
           <Route path="/espace-candidat/profil"  element={<CandidatProfil />} />
-
-          {/* Accessible aux candidats validés uniquement */}
           <Route path="/espace-candidat/forum" element={
             <ValidatedCandidateRoute>
               <ForumCommunaute />

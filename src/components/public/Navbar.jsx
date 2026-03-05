@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Menu, X, ChevronRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useRegistrationStatus } from '../../hooks/useRegistrationStatus'
+import CountdownBadge from '../ui/CountdownBadge'
 
 const navLinks = [
   { label: 'Le Comité',     href: '#comite' },
@@ -15,6 +17,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { isOpen, deadline, loaded } = useRegistrationStatus()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50)
@@ -39,16 +42,15 @@ export default function Navbar() {
     }
   }
 
-  const isLight = scrolled
+  // Les inscriptions sont fermées = on cache le bouton S'inscrire
+  const showRegister = !loaded || isOpen
 
   return (
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-400"
         style={{
-          background: scrolled
-            ? 'rgba(255,255,255,0.97)'
-            : 'transparent',
+          background: scrolled ? 'rgba(255,255,255,0.97)' : 'transparent',
           backdropFilter: scrolled ? 'blur(20px)' : 'none',
           borderBottom: scrolled ? '1px solid rgba(42,42,224,0.1)' : '1px solid transparent',
           boxShadow: scrolled ? '0 2px 24px rgba(42,42,224,0.08)' : 'none',
@@ -56,27 +58,21 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
-          {/* Logo avec image téléchargée */}
+          {/* Logo */}
           <button
             onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
             className="flex items-center gap-3 group"
           >
-            {/* Remplace "logo-unexe.png" par le nom réel de ton fichier */}
-            <img 
-              src="/unexe-logo.jpeg" 
-              alt="UNEXE Logo" 
+            <img
+              src="/unexe-logo.jpeg"
+              alt="UNEXE Logo"
               className="h-10 w-auto transition-transform duration-300 group-hover:scale-105"
-              style={{
-                filter: !scrolled ? 'brightness(0) invert(1)' : 'none', // Rend le logo blanc si fond transparent
-              }}
+              style={{ filter: !scrolled ? 'brightness(0) invert(1)' : 'none' }}
             />
             <div className="flex flex-col items-start">
               <span
                 className="font-black tracking-[0.18em] text-lg leading-none transition-colors"
-                style={{
-                  fontFamily: '"Playfair Display", Georgia, serif',
-                  color: scrolled ? '#0D0D1A' : '#FFFFFF',
-                }}
+                style={{ fontFamily: '"Playfair Display", Georgia, serif', color: scrolled ? '#0D0D1A' : '#FFFFFF' }}
               >
                 UNEXE
               </span>
@@ -89,17 +85,14 @@ export default function Navbar() {
             </div>
           </button>
 
-          {/* Navigation desktop */}
+          {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map(link => (
               <button
                 key={link.label}
                 onClick={() => handleNav(link.href)}
-                className="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 hover:bg-blue-50"
-                style={{
-                  color: scrolled ? 'rgba(13,13,26,0.65)' : 'rgba(255,255,255,0.75)',
-                  letterSpacing: '0.02em',
-                }}
+                className="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200"
+                style={{ color: scrolled ? 'rgba(13,13,26,0.65)' : 'rgba(255,255,255,0.75)', letterSpacing: '0.02em' }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = scrolled ? '#2A2AE0' : '#FFFFFF'
                   e.currentTarget.style.background = scrolled ? 'rgba(42,42,224,0.07)' : 'rgba(255,255,255,0.1)'
@@ -116,14 +109,22 @@ export default function Navbar() {
 
           {/* CTA desktop */}
           <div className="hidden md:flex items-center gap-3">
+
+            {/* Badge countdown */}
+            {loaded && (
+              <CountdownBadge
+                variant={scrolled ? 'dark' : 'light'}
+                size="sm"
+              />
+            )}
+
             {user ? (
               <button
                 onClick={() => navigate(user.role === 'candidat' ? '/espace-candidat' : '/dashboard')}
                 className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all duration-200 hover:scale-105"
                 style={{ background: '#2A2AE0', boxShadow: '0 4px 16px rgba(42,42,224,0.35)' }}
               >
-                Mon espace
-                <ChevronRight size={14} />
+                Mon espace <ChevronRight size={14} />
               </button>
             ) : (
               <>
@@ -135,22 +136,30 @@ export default function Navbar() {
                     border: scrolled ? '1.5px solid rgba(42,42,224,0.25)' : '1.5px solid rgba(255,255,255,0.25)',
                     background: 'transparent',
                   }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = scrolled ? 'rgba(42,42,224,0.06)' : 'rgba(255,255,255,0.1)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = 'transparent'
-                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = scrolled ? 'rgba(42,42,224,0.06)' : 'rgba(255,255,255,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   Se connecter
                 </button>
-                <button
-                  onClick={() => navigate('/register')}
-                  className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all duration-200 hover:scale-105"
-                  style={{ background: '#2A2AE0', boxShadow: '0 4px 16px rgba(42,42,224,0.35)' }}
-                >
-                  S'inscrire
-                </button>
+
+                {/* Bouton S'inscrire — grisé si fermé */}
+                {showRegister ? (
+                  <button
+                    onClick={() => navigate('/register')}
+                    className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all duration-200 hover:scale-105"
+                    style={{ background: '#2A2AE0', boxShadow: '0 4px 16px rgba(42,42,224,0.35)' }}
+                  >
+                    S'inscrire
+                  </button>
+                ) : (
+                  <div
+                    className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold rounded-xl cursor-not-allowed"
+                    style={{ background: 'rgba(42,42,224,0.15)', color: 'rgba(42,42,224,0.4)' }}
+                    title="Les inscriptions sont fermées"
+                  >
+                    S'inscrire
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -186,18 +195,20 @@ export default function Navbar() {
               onClick={() => handleNav(link.href)}
               className="flex items-center w-full px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-200"
               style={{ color: 'rgba(13,13,26,0.7)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(42,42,224,0.07)'
-                e.currentTarget.style.color = '#2A2AE0'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.color = 'rgba(13,13,26,0.7)'
-              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(42,42,224,0.07)'; e.currentTarget.style.color = '#2A2AE0' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(13,13,26,0.7)' }}
             >
               {link.label}
             </button>
           ))}
+
+          {/* Badge mobile */}
+          {loaded && (
+            <div className="px-4 pt-2 pb-1">
+              <CountdownBadge variant="dark" size="sm" />
+            </div>
+          )}
+
           <div className="pt-3 mt-2 border-t flex flex-col gap-2.5" style={{ borderColor: 'rgba(42,42,224,0.1)' }}>
             {user ? (
               <button
@@ -216,13 +227,22 @@ export default function Navbar() {
                 >
                   Se connecter
                 </button>
-                <button
-                  onClick={() => { navigate('/register'); setMenuOpen(false) }}
-                  className="w-full py-3.5 text-sm font-bold text-white rounded-xl"
-                  style={{ background: '#2A2AE0' }}
-                >
-                  S'inscrire
-                </button>
+                {showRegister ? (
+                  <button
+                    onClick={() => { navigate('/register'); setMenuOpen(false) }}
+                    className="w-full py-3.5 text-sm font-bold text-white rounded-xl"
+                    style={{ background: '#2A2AE0' }}
+                  >
+                    S'inscrire
+                  </button>
+                ) : (
+                  <div
+                    className="w-full py-3.5 text-sm font-bold rounded-xl text-center cursor-not-allowed"
+                    style={{ background: 'rgba(42,42,224,0.1)', color: 'rgba(42,42,224,0.4)' }}
+                  >
+                    Inscriptions fermées
+                  </div>
+                )}
               </>
             )}
           </div>
