@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+
+import { BrowserRouter, Routes, Route, Navigate,useSearchParams  } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
@@ -61,27 +62,25 @@ function PrivateRoute({ children, roles }) {
   return children
 }
 
-/* ───────────────────────────── */
-/* Guest Route */
-/* ───────────────────────────── */
-
 function GuestRoute({ children }) {
   const { user, loading } = useAuth()
+  const [searchParams] = useSearchParams()
+  const forCandidat = searchParams.get('for') === 'candidat'
 
   if (loading) return <LoadingSpinner />
 
+  // Si on vient du mail candidat (?for=candidat), on laisse toujours passer
+  // même si un admin est connecté — LoginPage gère la déconnexion
+  if (forCandidat) return children
+
   if (!user) return children
 
-  if (user.role === 'candidat') {
-    if (!user.is_profile_complete) {
-      return <Navigate to="/complete-profile" replace />
-    }
-    return <Navigate to="/espace-candidat" replace />
-  }
+  if (!user.is_profile_complete) return <Navigate to="/complete-profile" replace />
+
+  if (user.role === 'candidat') return <Navigate to="/espace-candidat" replace />
 
   return <Navigate to="/dashboard" replace />
 }
-
 /* ───────────────────────────── */
 /* Candidate Validated Route */
 /* ───────────────────────────── */

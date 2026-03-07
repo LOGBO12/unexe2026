@@ -67,7 +67,13 @@ export default function CompleteProfilePage() {
       await api.post('/profile/complete', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
-      navigate('/espace-candidat')
+     const currentUser = await api.get('/me')
+      const role = currentUser.data.user.role
+      if (role === 'super_admin' || role === 'comite') {
+        navigate('/dashboard')
+      } else {
+        navigate('/espace-candidat')
+      }
     } catch (err) {
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {})
