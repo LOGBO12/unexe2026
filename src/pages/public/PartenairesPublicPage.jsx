@@ -4,14 +4,12 @@ import Navbar from '../../components/public/Navbar'
 import Footer from '../../components/public/Footer'
 import { ExternalLink, Mail, Globe, ArrowUpRight, Star } from 'lucide-react'
 
-/* ─── Helpers ────────────────────────────────────────────────────────────── */
 function getLogoUrl(partner) {
   if (partner.logo_url) return partner.logo_url
   if (partner.logo)     return `/storage/${partner.logo}`
   return null
 }
 
-/* ─── Composant : grande carte partenaire ─────────────────────────────────── */
 function PartnerCard({ partner, index }) {
   const logoUrl = getLogoUrl(partner)
   const isEven  = index % 2 === 0

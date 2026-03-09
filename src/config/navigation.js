@@ -87,13 +87,6 @@ const navigation = [
     roles: ['super_admin'],
     dividerAfter: false,
   },
-  {
-    path:  '/dashboard/logs',
-    icon:  ScrollText,
-    label: 'Journaux',
-    roles: ['super_admin'],
-    dividerAfter: false,
-  },
 ]
 
 export default navigation

@@ -73,6 +73,7 @@ export default function ResetPasswordPage() {
         {/* Logo centré */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
+            <a href="/">
             <img 
               src="/unexe-logo.jpeg" 
               alt="UNEXE Logo" 
@@ -82,10 +83,13 @@ export default function ResetPasswordPage() {
                 e.target.parentElement.innerHTML += '<div class="w-16 h-16 bg-[#2A2AE0] rounded-xl flex items-center justify-center text-white text-2xl font-black">U</div>';
               }}
             />
+            </a>
           </div>
+          <a href="/">
           <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: '"Playfair Display", serif' }}>
             UNEXE
           </h1>
+          </a>
           <p className="text-gray-500 text-sm mt-2">
             University Excellence Elite · INSTI Lokossa
           </p>

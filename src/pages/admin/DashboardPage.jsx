@@ -92,7 +92,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={() => navigate('/dashboard/invitations')}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition"
         >
           <Mail size={16} />
           Envoyer une invitation

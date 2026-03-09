@@ -263,7 +263,6 @@ function HeroCountdown({ user }) {
   )
 }
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -271,7 +270,7 @@ export default function HomePage() {
   const [visible, setVisible]         = useState(false)
   const [committeeData, setCommitteeData] = useState(null)
   const [partners, setPartners]       = useState([])
-  const [leaders, setLeaders]         = useState([])   // ← ICI dans le composant
+  const [leaders, setLeaders]         = useState([])   
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
@@ -285,7 +284,6 @@ export default function HomePage() {
     api.get('/public/partners')
       .then(res => setPartners(res.data || []))
       .catch(() => {})
-    // ← Fetch leaders ICI dans le composant
     api.get('/public/candidates')
       .then(res => {
         const all = Object.values(res.data.candidates || {}).flat()
@@ -450,7 +448,6 @@ export default function HomePage() {
       <section id="candidats" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           {leaders.length > 0 ? (
-            /* Champion(s) révélé(s) */
             <div>
               <div className="text-center mb-12">
                 <Tag>RÉSULTATS FINAUX</Tag>

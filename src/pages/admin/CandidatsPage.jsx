@@ -3,13 +3,20 @@ import api from '../../api/axios'
 import { Search, Users, RefreshCw } from 'lucide-react'
 
 export default function CandidatsPage() {
-  const [data, setData]       = useState({ candidates: {}, departments: [] })
-  const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState({
+  const [data, setData]               = useState({ candidates: {} })
+  const [departments, setDepartments] = useState([])
+  const [loading, setLoading]         = useState(true)
+  const [filters, setFilters]         = useState({
     search: '', department_id: '', year: ''
   })
 
-  const load = (f = filters) => {
+  useEffect(() => {
+    api.get('/public/departments')
+      .then(res => setDepartments(res.data.departments || []))
+      .catch(console.error)
+  }, [])
+
+  const load = (f) => {
     setLoading(true)
     const params = new URLSearchParams()
     if (f.search)        params.append('search', f.search)
@@ -22,7 +29,15 @@ export default function CandidatsPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load({ search: '', department_id: '', year: '' })
+  }, [])
+
+  const updateFilter = (key, value) => {
+    const updated = { ...filters, [key]: value }
+    setFilters(updated)
+    load(updated)
+  }
 
   const allCandidates = Object.values(data.candidates || {}).flat()
 
@@ -37,8 +52,10 @@ export default function CandidatsPage() {
             {allCandidates.length} candidat{allCandidates.length > 1 ? 's' : ''} avec profil complété
           </p>
         </div>
-        <button onClick={() => load()}
-          className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition">
+        <button
+          onClick={() => load(filters)}
+          className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
+        >
           <RefreshCw size={16} className="text-gray-500" />
         </button>
       </div>
@@ -52,32 +69,35 @@ export default function CandidatsPage() {
             placeholder="Rechercher par nom..."
             value={filters.search}
             onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-            onKeyDown={e => e.key === 'Enter' && load({ ...filters })}
+            onKeyDown={e => e.key === 'Enter' && load(filters)}
             className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition"
           />
         </div>
+
         <select
           value={filters.department_id}
-          onChange={e => { const v = e.target.value; setFilters(f => ({ ...f, department_id: v })); load({ ...filters, department_id: v }) }}
+          onChange={e => updateFilter('department_id', e.target.value)}
           className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           <option value="">Tous les départements</option>
-          {data.departments?.map(d => (
+          {departments.map(d => (
             <option key={d.id} value={d.id}>{d.name}</option>
           ))}
         </select>
+
         <select
           value={filters.year}
-          onChange={e => { const v = e.target.value; setFilters(f => ({ ...f, year: v })); load({ ...filters, year: v }) }}
+          onChange={e => updateFilter('year', e.target.value)}
           className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           <option value="">Toutes les années</option>
           <option value="1">1ère année</option>
           <option value="2">2ème année</option>
         </select>
+
         <button
           onClick={() => load(filters)}
-          className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition"
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition"
         >
           Rechercher
         </button>
@@ -97,7 +117,6 @@ export default function CandidatsPage() {
         <div className="space-y-8">
           {Object.entries(data.candidates || {}).map(([dept, candidates]) => (
             <div key={dept}>
-              {/* Titre département */}
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-lg font-bold text-gray-800">{dept}</h2>
                 <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-medium">
@@ -106,7 +125,6 @@ export default function CandidatsPage() {
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
 
-              {/* Grouper par année */}
               {['1', '2'].map(year => {
                 const group = candidates.filter(c => String(c.year) === year)
                 if (group.length === 0) return null
@@ -119,29 +137,20 @@ export default function CandidatsPage() {
                       {group.map(c => (
                         <div key={c.id}
                           className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition group">
-                          {/* Photo */}
                           <div className="h-36 bg-gray-100 overflow-hidden">
                             {c.photo_url ? (
-                              <img
-                                src={c.photo_url}
-                                alt={c.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                              />
+                              <img src={c.photo_url} alt={c.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-red-900">
-                                <span className="text-3xl font-bold text-white">
-                                  {c.name?.charAt(0)}
-                                </span>
+                                <span className="text-3xl font-bold text-white">{c.name?.charAt(0)}</span>
                               </div>
                             )}
                           </div>
-                          {/* Infos */}
                           <div className="p-3">
                             <p className="font-semibold text-gray-900 text-sm truncate">{c.name}</p>
                             <p className="text-xs text-red-600 font-medium truncate">{c.filiere}</p>
-                            {c.bio && (
-                              <p className="text-xs text-gray-400 mt-1 line-clamp-2">{c.bio}</p>
-                            )}
+                            {c.bio && <p className="text-xs text-gray-400 mt-1 line-clamp-2">{c.bio}</p>}
                           </div>
                         </div>
                       ))}

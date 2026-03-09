@@ -7,7 +7,6 @@ import {
   Trophy, Crown, ChevronRight, TrendingUp, Zap, X, Star
 } from 'lucide-react'
 
-// ─── Config départements ──────────────────────────────────────────────────────
 const DEPT_CONFIG = {
   GEI: { label: 'Génie Électrique et Informatique', color: '#2A2AE0', bg: 'rgba(42,42,224,0.08)' },
   GC:  { label: 'Génie Civil',                      color: '#008751', bg: 'rgba(0,135,81,0.08)'   },
@@ -25,7 +24,6 @@ function getDeptConfig(candidate) {
   return found || { label: candidate.department || 'Département', color: '#2A2AE0', bg: 'rgba(42,42,224,0.08)' }
 }
 
-// ─── Statuts de décision (même config que MesResultats) ──────────────────────
 const STATUS_CONFIG = {
   pending:    { label: 'En attente',  color: '#F0C040', bg: 'rgba(240,192,64,0.1)',  icon: null         },
   continuing: { label: 'Qualifié ✓', color: '#4DC896', bg: 'rgba(77,200,150,0.1)',  icon: ChevronRight },
@@ -47,7 +45,6 @@ function DecisionBadge({ status, sm = false }) {
   )
 }
 
-// ─── Barre de score (identique à MesResultats) ────────────────────────────────
 function ScoreBar({ score, large = false }) {
   if (score === null || score === undefined) return null
   const pct   = Math.min(100, (parseFloat(score) / 20) * 100)
@@ -73,8 +70,6 @@ function ScoreBar({ score, large = false }) {
   )
 }
 
-// ─── Ligne d'une phase dans le panneau déroulant ──────────────────────────────
-// phase_scores vient de l'API : { phase_number, phase_name, score, status, is_final, phase_status }
 function PhaseRow({ ps }) {
   const cfg        = STATUS_CONFIG[ps.status] || STATUS_CONFIG.pending
   const scoreColor = ps.score !== null
@@ -109,21 +104,17 @@ function PhaseRow({ ps }) {
   )
 }
 
-// ─── Carte Candidat ───────────────────────────────────────────────────────────
 function CandidateCard({ candidate, hasCompetition }) {
   const [showPhases, setShowPhases] = useState(false)
 
   const dept       = getDeptConfig(candidate)
   const slug       = candidate.department_slug || ''
   const isLeader   = candidate.is_leader
-  // phase_scores : [{ phase_number, phase_name, score, status, is_final, phase_status }]
   const phaseScores = Array.isArray(candidate.phase_scores) ? candidate.phase_scores : []
 
-  // Dernier score publié (phases completed uniquement, car l'API masque les scores actifs)
   const withScore  = phaseScores.filter(ps => ps.score !== null)
   const lastScore  = withScore[withScore.length - 1] ?? null
 
-  // Statut global : dernier statut connu du candidat
   const lastEntry    = phaseScores[phaseScores.length - 1] ?? null
   const globalStatus = isLeader ? 'leader' : lastEntry?.status ?? null
 
@@ -320,7 +311,6 @@ function CandidateCard({ candidate, hasCompetition }) {
   )
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
 function CardSkeleton() {
   return (
     <div className="bg-white rounded-3xl overflow-hidden border animate-pulse" style={{ borderColor: 'rgba(42,42,224,0.06)' }}>
@@ -335,7 +325,6 @@ function CardSkeleton() {
   )
 }
 
-// ─── Bannière Champions ───────────────────────────────────────────────────────
 function LeaderBanner({ leaders }) {
   if (!leaders || leaders.length === 0) return null
   return (
@@ -376,8 +365,6 @@ function LeaderBanner({ leaders }) {
   )
 }
 
-// ─── Timeline des phases ──────────────────────────────────────────────────────
-// phases vient de l'API : [{ id, phase_number, name, status, is_final }]
 function PhasesTimeline({ phases }) {
   if (!phases || phases.length === 0) return null
   const CLR = { pending: '#9CA3AF', active: '#4DC896', completed: '#2A2AE0' }
@@ -438,15 +425,7 @@ function Tag({ children, light = false }) {
   )
 }
 
-// ─── PAGE PRINCIPALE ──────────────────────────────────────────────────────────
 export default function CandidatsPublicPage() {
-  // Structure API :
-  //   res.data.candidates  → objet groupé { "Nom département": [candidat, ...] }
-  //   res.data.phases      → [{ id, phase_number, name, status, is_final }]
-  //   res.data.has_competition → bool
-  //   Chaque candidat : { id, name, photo_url, department, department_slug, year,
-  //                       filiere, bio, is_leader, current_phase,
-  //                       phase_scores: [{ phase_number, phase_name, score, status, is_final, phase_status }] }
 
   const [grouped, setGrouped]               = useState({})
   const [allList, setAllList]               = useState([])
@@ -478,7 +457,6 @@ export default function CandidatsPublicPage() {
   const availableDepts = Object.keys(grouped)
   const activePhaseObj = phases.find(p => p.status === 'active')
 
-  // ─── Filtrage ──────────────────────────────────────────────────────────────
   const filtered = allList.filter(c => {
     const matchSearch = !search || c.name?.toLowerCase().includes(search.toLowerCase())
     const matchDept   = activeDept === 'TOUS'
@@ -489,7 +467,6 @@ export default function CandidatsPublicPage() {
     return matchSearch && matchDept && matchYear && matchPhase
   })
 
-  // Leaders en premier, puis par phase décroissante
   const sorted = [...filtered].sort((a, b) => {
     if (a.is_leader && !b.is_leader) return -1
     if (!a.is_leader && b.is_leader) return 1

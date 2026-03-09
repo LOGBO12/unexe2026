@@ -233,15 +233,7 @@ export default function ComitePageEditor() {
             <input id="team-photo-input" type="file" accept="image/jpg,image/jpeg,image/png"
               onChange={handlePhoto} className="hidden" />
           </label>
-
           <p className="text-xs text-gray-400">Formats : JPG, PNG · Max 5 Mo</p>
-
-          {/* Afficher l'URL sauvegardée pour debug */}
-          {savedPhotoUrl && !teamPhoto && (
-            <p className="text-[10px] text-gray-400">
-              URL actuelle : <code className="bg-gray-100 px-1 py-0.5 rounded">{savedPhotoUrl}</code>
-            </p>
-          )}
         </div>
 
         {/* Bouton save */}

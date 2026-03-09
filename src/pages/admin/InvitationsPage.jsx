@@ -23,7 +23,6 @@ export default function InvitationsPage() {
   const [success, setSuccess]         = useState(null)
   const [error, setError]             = useState(null)
 
-  // ← year ajouté dans le state initial
   const [form, setForm] = useState({ email: '', role: 'comite', department_id: '', year: '' })
 
   const load = () => {
@@ -94,7 +93,7 @@ export default function InvitationsPage() {
           </button>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition"
           >
             <Plus size={16} />
             Nouvelle invitation

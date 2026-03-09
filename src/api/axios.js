@@ -18,14 +18,20 @@ api.interceptors.request.use((config) => {
 })
 
 // Gérer les erreurs globalement (401 = déconnexion)
+// SAUF pour /login et /register où le 401 est une erreur normale
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRoute = 
+      error.config?.url?.includes('/login') ||
+      error.config?.url?.includes('/register')
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
     }
+
     return Promise.reject(error)
   }
 )
