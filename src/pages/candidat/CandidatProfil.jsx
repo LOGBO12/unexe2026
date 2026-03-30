@@ -48,7 +48,9 @@ function Textarea({ error, ...props }) {
 export default function CandidatProfil() {
   const { user }  = useAuth()
   const candidate = user?.candidate
-  const photo     = user?.avatar ? `/storage/${user.avatar}` : null
+  const photo = user?.avatar 
+  ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.replace('avatars/', '')}` 
+  : null
 
   const [tab, setTab]             = useState('profil') // profil | password
   const [saving, setSaving]       = useState(false)
