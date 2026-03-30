@@ -49,7 +49,7 @@ export default function CandidatProfil() {
   const { user }  = useAuth()
   const candidate = user?.candidate
   const photo = user?.avatar 
-  ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.replace('avatars/', '')}` 
+  ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.split('/').pop()}` 
   : null
 
   const [tab, setTab]             = useState('profil') // profil | password
