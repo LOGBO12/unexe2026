@@ -61,7 +61,7 @@ function StatCard({ value, label, icon: Icon, color = '#2A2AE0' }) {
 }
 
 function PartnerLogoCard({ partner }) {
-  const logoUrl = partner.logo_url || (partner.logo ? `/storage/${partner.logo}` : null)
+  const logoUrl = partner.logo_url || (partner.logo ? `https://unexe.alwaysdata.net/storage/${partner.logo}` : null)
   return (
     <div
       className="group relative flex flex-col items-center justify-center rounded-2xl border transition-all duration-300 cursor-default"
