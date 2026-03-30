@@ -10,12 +10,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://unexe.alwaysdata.net',
         changeOrigin: true,
       },
       // Ajout du proxy storage pour les images Laravel
       '/storage': {
-        target: 'http://localhost:8000',
+        target: 'https://unexe.alwaysdata.net',
         changeOrigin: true,
       },
     }
