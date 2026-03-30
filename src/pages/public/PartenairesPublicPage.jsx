@@ -6,7 +6,7 @@ import { ExternalLink, Mail, Globe, ArrowUpRight, Star } from 'lucide-react'
 
 function getLogoUrl(partner) {
   if (partner.logo_url) return partner.logo_url
-  if (partner.logo)     return `/storage/${partner.logo}`
+  if (partner.logo)     return `https://unexe.alwaysdata.net/storage/${partner.logo}`
   return null
 }
 
