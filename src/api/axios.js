@@ -17,8 +17,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Gérer les erreurs globalement (401 = déconnexion)
-// SAUF pour /login et /register où le 401 est une erreur normale
 api.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -7,7 +7,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Au démarrage : recharger l'utilisateur si un token existe
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
@@ -35,12 +34,10 @@ export function AuthProvider({ children }) {
     try {
       await api.post('/logout')
     } catch (e) {
-      // ignorer les erreurs réseau
     } finally {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       setUser(null)
-      // ✅ Forcer rechargement complet vers l'accueil
       window.location.href = '/'
     }
   }

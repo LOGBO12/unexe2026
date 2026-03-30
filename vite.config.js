@@ -13,7 +13,7 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
-      // ✅ Ajout du proxy storage pour les images Laravel
+      // Ajout du proxy storage pour les images Laravel
       '/storage': {
         target: 'http://localhost:8000',
         changeOrigin: true,
