@@ -64,6 +64,13 @@ const navigation = [
     dividerAfter: false,
   },
   {
+  path:  '/dashboard/profil',
+  icon:  Users,
+  label: 'Mon profil',
+  roles: ['super_admin', 'comite'],
+  dividerAfter: false,
+},
+  {
     path:  '/dashboard/forum',
     icon:  MessageSquare,
     label: 'Forum',

@@ -87,7 +87,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div
           className="px-4 py-4 mx-3 mt-3 rounded-2xl cursor-pointer group"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-          onClick={() => { navigate('/profil'); onClose?.() }}
+          onClick={() => { navigate('/dashboard/profil'); onClose?.() }}
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">

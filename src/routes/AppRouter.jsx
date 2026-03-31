@@ -157,32 +157,25 @@ export default function AppRouter() {
           <Route path="comite" element={<ComiteMembresPage />} />
           <Route path="partenaires" element={<PartenairesAdminPage />} />
           <Route path="forum" element={<ForumPage />} />
+          <Route path="profil" element={<ProfilePage />} />  {/* ← AJOUTÉ ICI */}
 
           <Route path="registration" element={
             <PrivateRoute roles={['super_admin']}>
               <RegistrationSettingsPage />
             </PrivateRoute>
           }/>
-
           <Route path="comite/page" element={
             <PrivateRoute roles={['super_admin']}>
               <ComitePageEditor />
             </PrivateRoute>
           }/>
-
           <Route path="logs" element={
             <PrivateRoute roles={['super_admin']}>
               <LogsPage />
             </PrivateRoute>
           }/>
-
         </Route>
 
-        <Route path="/profil" element={
-          <PrivateRoute roles={['super_admin','comite']}>
-            <ProfilePage />
-          </PrivateRoute>
-        }/>
 
         {/* Candidat */}
         <Route path="/espace-candidat/*" element={
