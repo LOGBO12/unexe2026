@@ -8,16 +8,18 @@ import {
 
 // ─── Labels des documents ─────────────────────────────────────────────────────
 const DOC_LABELS = {
-  cv:                     { label: 'CV',                     icon: '📄', color: '#2A2AE0' },
-  releve_bac:             { label: 'Relevé BAC',             icon: '🎓', color: '#008751' },
-  fiche_preinscription_1: { label: 'Préinscription 1A',      icon: '📋', color: '#F0C040' },
-  validation_1ere_annee:  { label: 'Validation / Relevé 1A', icon: '✅', color: '#7C3AED' },
-  fiche_preinscription_2: { label: 'Préinscription 2A',      icon: '📋', color: '#E8112D' },
+  cv:                     { label: 'CV',                     icon: '', color: '#2A2AE0' },
+  releve_bac:             { label: 'Relevé BAC',             icon: '', color: '#008751' },
+  fiche_preinscription_1: { label: 'Préinscription 1A',      icon: '', color: '#F0C040' },
+  validation_1ere_annee:  { label: 'Validation / Relevé 1A', icon: '', color: '#7C3AED' },
+  fiche_preinscription_2: { label: 'Préinscription 2A',      icon: '', color: '#E8112D' },
   // Anciens noms (compatibilité)
-  cv_path:                { label: 'CV',                     icon: '📄', color: '#2A2AE0' },
-  notes:                  { label: 'Relevé de notes',        icon: '📊', color: '#008751' },
-  photo:                  { label: 'Photo',                  icon: '🖼️', color: '#F0C040' },
+  cv_path:                { label: 'CV',                     icon: '', color: '#2A2AE0' },
+  notes:                  { label: 'Relevé de notes',        icon: '', color: '#008751' },
+  photo:                  { label: 'Photo',                  icon: '', color: '#F0C040' },
 }
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://unexe.alwaysdata.net/api'
 
 function StatusBadge({ status }) {
   if (status === 'validated')
@@ -53,7 +55,7 @@ function DocumentsGrid({ documents, documentsUrls }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
       {Object.entries(docs).map(([key, value]) => {
         const config = DOC_LABELS[key] || { label: key, icon: '📎', color: '#6B7280' }
-        const url    = typeof value === 'object' ? value.url : `/storage/${value}`
+        const url = typeof value === 'object' ? value.url : `${API_BASE}/storage/${value}`
         const label  = typeof value === 'object' ? value.label : config.label
 
         return (
@@ -468,7 +470,7 @@ export default function CandidaturesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
             <h3 className="text-lg font-bold text-gray-800">
-              {actionModal.type === 'validate' ? '✅ Valider la candidature' : '❌ Rejeter la candidature'}
+              {actionModal.type === 'validate' ? ' Valider la candidature' : '❌ Rejeter la candidature'}
             </h3>
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-sm text-gray-600">

@@ -157,7 +157,7 @@ export default function RegistrationSettingsPage() {
       // Re-synchroniser le champ date avec ce que le serveur a retourné
       setDeadline(isoToLocal(res.data.data?.registration_deadline))
 
-      flash('success', '✅ Paramètres sauvegardés ! Compte à rebours actif sur l\'accueil.')
+      flash('success', 'Paramètres sauvegardés ! Compte à rebours actif sur l\'accueil.')
     } catch (err) {
       console.error('[RegistrationSettings] Erreur :', err.response?.data)
       const msg = err.response?.data?.errors
