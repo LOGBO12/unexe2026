@@ -15,8 +15,9 @@ const EMPTY_FORM = {
 
 /* ─── Carte partenaire ────────────────────────────────────────────────────── */
 function PartnerCard({ partner, onEdit, onDelete }) {
-  const logoUrl = partner.logo_url || (partner.logo ? `/storage/${partner.logo}` : null)
-
+  const logoUrl = partner.logo_url || (partner.logo 
+  ? `https://unexe.alwaysdata.net/api/storage/partners/${partner.logo.split('/').pop()}` 
+  : null)
   return (
     <div
       className="group bg-white rounded-2xl border overflow-hidden transition-all duration-300 flex flex-col"
@@ -142,8 +143,10 @@ function PartnerModal({ editing, initialData, onClose, onSaved }) {
   const [form, setForm]       = useState(initialData || EMPTY_FORM)
   const [logo, setLogo]       = useState(null)
   const [preview, setPreview] = useState(
-    initialData?.logo_url || (initialData?.logo ? `/storage/${initialData.logo}` : null)
-  )
+  initialData?.logo_url || (initialData?.logo 
+    ? `https://unexe.alwaysdata.net/api/storage/partners/${initialData.logo.split('/').pop()}` 
+    : null)
+)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState(null)
 
