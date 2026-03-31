@@ -13,9 +13,11 @@ export default function ProfilePage() {
     password_confirmation: '',
   })
   const [avatar, setAvatar]       = useState(null)
-  const [preview, setPreview]     = useState(
-    user?.avatar ? `/storage/${user.avatar}` : null
-  )
+  const [preview, setPreview] = useState(
+  user?.avatar 
+    ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.split('/').pop()}` 
+    : null
+)
   const [saving, setSaving]       = useState(false)
   const [success, setSuccess]     = useState(null)
   const [error, setError]         = useState(null)

@@ -10,7 +10,9 @@ export default function Sidebar({ isOpen, onClose }) {
   const [loggingOut, setLoggingOut] = useState(false)
 
   const links    = navigation.filter(item => item.roles.includes(user?.role))
-  const photoUrl = user?.avatar ? `/storage/${user.avatar}` : null
+  const photoUrl = user?.avatar 
+  ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.split('/').pop()}` 
+  : null
 
   const handleLogout = async () => {
     setLoggingOut(true)

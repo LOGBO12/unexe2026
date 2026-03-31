@@ -17,7 +17,9 @@ export default function EspaceCandidatLayout() {
   const dept        = candidate?.department?.name || 'INSTI Lokossa'
   const slug        = candidate?.department?.slug || '—'
   const year        = candidate?.year === '1' ? '1ère année' : candidate?.year === '2' ? '2ème année' : '—'
-  const photo       = user?.avatar ? `/storage/${user.avatar}` : null
+  const photo = user?.avatar 
+  ? `https://unexe.alwaysdata.net/api/storage/avatars/${user.avatar.split('/').pop()}` 
+  : null
 
   const NAV_ITEMS = [
     {
