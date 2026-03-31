@@ -180,7 +180,7 @@ export default function ComiteMembresPage() {
                         style={{ background: 'linear-gradient(135deg, #2A2AE0, #1A1A8B)' }}
                       >
                         {selectedUser.avatar
-                          ? <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${valeur.split('/').pop()}`} className="w-full h-full object-cover rounded-full" alt="" />
+                          ? <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${selectedUser.avatar.split('/').pop()}`} className="w-full h-full object-cover rounded-full" alt="" />
                           : selectedUser.name?.charAt(0)
                         }
                       </div>
@@ -290,10 +290,9 @@ export default function ComiteMembresPage() {
             <div key={member.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition">
               <div className="h-40 bg-gray-100 overflow-hidden relative">
                 {member.photo ? (
-                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${valeur.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />
+                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${member.photo.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />
                 ) : member.user?.avatar ? (
-                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${valeur.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />
-                ) : (
+                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${member.user.avatar.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#2A2AE0]">
                     <span className="text-3xl font-bold text-white">{member.user?.name?.charAt(0)}</span>
                   </div>
