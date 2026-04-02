@@ -1,6 +1,28 @@
 import { useEffect, useState } from 'react'
 import api from '../../api/axios'
-import { Plus, Trash2, RefreshCw, Shield, Users, Crown } from 'lucide-react'
+import { Plus, Trash2, RefreshCw, Shield, Users, Crown, ChevronDown } from 'lucide-react'
+
+function ExpandableBio({ bio }) {
+  const [expanded, setExpanded] = useState(false)
+  if (!bio) return null
+  const isLong = bio.length > 80
+  return (
+    <div>
+      <p className={`text-xs text-gray-500 mt-1 leading-relaxed ${!expanded && isLong ? 'line-clamp-2' : ''}`}>
+        {bio}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="mt-1 text-[10px] font-semibold text-blue-500 hover:text-blue-700 flex items-center gap-0.5 transition"
+        >
+          <ChevronDown size={11} className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+          {expanded ? 'Voir moins' : 'Voir plus'}
+        </button>
+      )}
+    </div>
+  )
+}
 
 export default function ComiteMembresPage() {
   const [members, setMembers]         = useState([])
@@ -35,7 +57,7 @@ export default function ComiteMembresPage() {
   }, [])
 
   const handleOpenForm = () => {
-    loadAvailableUsers() // Rafraîchir la liste à chaque ouverture
+    loadAvailableUsers()
     setShowForm(true)
     setError(null)
     setSuccess(null)
@@ -85,7 +107,6 @@ export default function ComiteMembresPage() {
     }
   }
 
-  // Utilisateur sélectionné dans le select
   const selectedUser = availableUsers.find(u => String(u.id) === String(form.user_id))
 
   return (
@@ -114,7 +135,6 @@ export default function ComiteMembresPage() {
         </div>
       </div>
 
-      {/* Info : nb membres disponibles */}
       {availableUsers.length === 0 && !loading && (
         <div className="p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm flex items-center gap-2">
           <Users size={16} />
@@ -140,13 +160,11 @@ export default function ComiteMembresPage() {
         </div>
       )}
 
-      {/* Formulaire ajout */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Ajouter un membre au comité</h2>
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
 
-            {/* Select utilisateur */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Membre à ajouter *
@@ -172,7 +190,6 @@ export default function ComiteMembresPage() {
                     ))}
                   </select>
 
-                  {/* Preview utilisateur sélectionné */}
                   {selectedUser && (
                     <div className="mt-2 flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
                       <div
@@ -201,7 +218,6 @@ export default function ComiteMembresPage() {
               )}
             </div>
 
-            {/* Position */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Poste / Position *</label>
               <input
@@ -214,7 +230,6 @@ export default function ComiteMembresPage() {
               />
             </div>
 
-            {/* Ordre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ordre d'affichage</label>
               <input
@@ -226,7 +241,6 @@ export default function ComiteMembresPage() {
               />
             </div>
 
-            {/* Bio */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Biographie</label>
               <textarea
@@ -238,7 +252,6 @@ export default function ComiteMembresPage() {
               />
             </div>
 
-            {/* Photo */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Photo <span className="text-gray-400 font-normal">(facultatif — sinon l'avatar du compte sera utilisé)</span>
@@ -274,7 +287,6 @@ export default function ComiteMembresPage() {
         </div>
       )}
 
-      {/* Liste membres */}
       {loading ? (
         <div className="flex items-center justify-center h-40">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -292,12 +304,12 @@ export default function ComiteMembresPage() {
                 {member.photo ? (
                   <img src={`https://unexe.alwaysdata.net/api/storage/committee/${member.photo.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />
                 ) : member.user?.avatar ? (
-                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${member.user.avatar.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />) : (
+                  <img src={`https://unexe.alwaysdata.net/api/storage/avatars/${member.user.avatar.split('/').pop()}`} alt={member.user?.name} className="w-full h-full object-cover" />
+                ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] to-[#2A2AE0]">
                     <span className="text-3xl font-bold text-white">{member.user?.name?.charAt(0)}</span>
                   </div>
                 )}
-                {/* Badge rôle */}
                 {member.user?.role === 'super_admin' && (
                   <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-red-600 text-white">
                     <Crown size={9} /> Super Admin
@@ -307,7 +319,7 @@ export default function ComiteMembresPage() {
               <div className="p-4">
                 <p className="font-semibold text-gray-900">{member.user?.name}</p>
                 <p className="text-xs text-blue-600 font-medium">{member.position}</p>
-                {member.bio && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{member.bio}</p>}
+                <ExpandableBio bio={member.bio} />
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xs text-gray-400">Ordre : {member.display_order}</span>
                   <button
