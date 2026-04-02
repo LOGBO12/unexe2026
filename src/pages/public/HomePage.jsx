@@ -8,7 +8,7 @@ import { useRegistrationStatus } from '../../hooks/useRegistrationStatus'
 import {
   ChevronRight, Award, Users, BookOpen, Globe, ArrowRight, Target, Zap,
   Trophy, Cpu, Home, Sparkles, GraduationCap, Building2, Medal, Star,
-  ExternalLink, Clock, Lock, AlertTriangle, Crown
+  ExternalLink, Clock, Lock, AlertTriangle, Crown, ChevronDown
 } from 'lucide-react'
 
 // ─── Composants utilitaires ───────────────────────────────────────────────────
@@ -121,6 +121,32 @@ function CountUnit({ value, label, urgent }) {
         style={{ color: urgent ? 'rgba(255,107,107,0.6)' : 'rgba(255,255,255,0.3)' }}>
         {label}
       </span>
+    </div>
+  )
+}
+
+function ExpandableBio({ bio, className = '' }) {
+  const [expanded, setExpanded] = useState(false)
+  if (!bio) return null
+  const isLong = bio.length > 120
+  return (
+    <div>
+      <p className={`text-sm leading-relaxed ${className} ${!expanded && isLong ? 'line-clamp-2' : ''}`}>
+        {bio}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="mt-1.5 flex items-center gap-1 text-xs font-semibold transition"
+          style={{ color: '#2A2AE0' }}
+        >
+          <ChevronDown
+            size={13}
+            className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          />
+          {expanded ? 'Voir moins' : 'Voir plus'}
+        </button>
+      )}
     </div>
   )
 }
@@ -270,7 +296,7 @@ export default function HomePage() {
   const [visible, setVisible]         = useState(false)
   const [committeeData, setCommitteeData] = useState(null)
   const [partners, setPartners]       = useState([])
-  const [leaders, setLeaders]         = useState([])   
+  const [leaders, setLeaders]         = useState([])
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80)
@@ -433,7 +459,7 @@ export default function HomePage() {
                     </div>
                     <h3 className="font-bold text-lg text-[#0D0D1A] mb-1">{member.name}</h3>
                     <p className="text-[#2A2AE0] text-sm font-semibold mb-2">{member.position}</p>
-                    {member.bio && <p className="text-gray-500 text-sm line-clamp-2">{member.bio}</p>}
+                    <ExpandableBio bio={member.bio} className="text-gray-500" />
                   </div>
                 ))}
               </div>
@@ -485,7 +511,6 @@ export default function HomePage() {
               </div>
             </div>
           ) : (
-            /* Affichage normal */
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div>
                 <Tag>NOS CANDIDATS</Tag>
